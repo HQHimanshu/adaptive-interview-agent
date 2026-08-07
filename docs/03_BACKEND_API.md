@@ -1,21 +1,46 @@
-POST /api/interview
+# Backend API
 
-Purpose
+## POST /api/interview
 
-Start or continue interview.
+### Purpose
 
-Request
+Start or continue an interview session.
 
-sessionId
+### Request
 
-candidate
+| Field | Type | Required | Description |
+|--------|------|----------|-------------|
 
-message
+### Response
 
-Response
+| Field | Type | Description |
 
-reply
+### Error Responses
 
-done
+400 Bad Request
 
-feedback
+401 Unauthorized
+
+404 Session Not Found
+
+500 Internal Server Error
+
+### Example Request
+
+...
+
+### Example Response
+
+...
+
+### Session Lifecycle
+
+...
+
+### Validation Rules
+
+...
+
+### Edge Cases
+
+...
