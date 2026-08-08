@@ -32,7 +32,7 @@ Status: ✅ Completed
 - [x] File Reader
 - [x] Path Configuration
 - [x] Session Manager
-- [ ] Prompt Builder
+- [x] Prompt Builder
 - [ ] Breeth Service
 - [ ] LLM Service
 - [ ] Interview Controller
