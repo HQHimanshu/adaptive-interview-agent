@@ -2,7 +2,7 @@
 
 ## Project Status
 
-Sprint 2 – Data Layer
+Sprint 5 – LLM Service
 
 Status: ✅ Completed
 
@@ -34,7 +34,7 @@ Status: ✅ Completed
 - [x] Session Manager
 - [x] Prompt Builder
 - [ ] Breeth Service
-- [ ] LLM Service
+- [x] LLM Service
 - [ ] Interview Controller
 - [ ] Feedback Generator
 
@@ -63,9 +63,15 @@ Status: ✅ Completed
 
 ## Current Sprint
 
-Sprint 3
+Sprint 5
 
-Session Manager
+LLM Service
+
+---
+
+## Next Sprint
+
+Sprint 6 – Breeth Service
 
 ---
 

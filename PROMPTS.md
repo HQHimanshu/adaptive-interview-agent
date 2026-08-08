@@ -2,6 +2,18 @@
 
 ---
 
+# Sprint 5 – Groq LLM Service Integration
+
+Implemented a Groq SDK-backed backend LLM service that accepts structured prompt sections from the prompt builder and sends them as chat completion messages to `groq-sdk`.
+
+Key prompt design:
+- system instructions for technical interview behavior
+- candidate and curriculum context
+- interview state and conversation history
+- explicit instruction to continue conversation or evaluate interview
+
+This prompt record documents the structure converted by the LLM service rather than the final model response.
+
 # Sprint 1 – Backend Initialization
 
 You are the Backend Engineer of our hackathon team.
