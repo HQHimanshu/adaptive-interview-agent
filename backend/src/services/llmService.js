@@ -182,26 +182,36 @@ function parseGroqResponse(response) {
  * @param {string} [options.model] - Optional model override.
  * @returns {Promise<string>}
  */
-async function generateInterviewResponse(promptSections, { client, model } = {}) {
-    const messages = buildGroqMessages(promptSections);
-    const resolvedModel = getGroqModel(model);
-    const resolvedClient = client || createGroqClient();
+async function generateInterviewResponse(
+  promptSections,
+  { client, model, responseFormat } = {}
+) {
+  const messages = buildGroqMessages(promptSections);
+  const resolvedModel = getGroqModel(model);
+  const resolvedClient = client || createGroqClient();
 
-    try {
-        const completion = await resolvedClient.chat.completions.create({
-            model: resolvedModel,
-            messages,
-        });
+  const request = {
+    model: resolvedModel,
+    messages,
+  };
 
-        return parseGroqResponse(completion);
-    } catch (error) {
-        if (error instanceof Groq.APIError) {
-            const details = error.message || 'Request failed.';
-            throw new Error(`Groq API error (${error.name || 'APIError'}): ${details}`);
-        }
+  if (responseFormat) {
+    request.response_format = responseFormat;
+  }
 
-        throw error;
+  try {
+    const completion = await resolvedClient.chat.completions.create(request);
+    return parseGroqResponse(completion);
+  } catch (error) {
+    if (error instanceof Groq.APIError) {
+      const details = error.message || 'Request failed.';
+      throw new Error(
+        `Groq API error (${error.name || 'APIError'}): ${details}`
+      );
     }
+
+    throw error;
+  }
 }
 
 module.exports = {

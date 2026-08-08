@@ -299,12 +299,14 @@ function buildBasePromptSections(candidate, curriculumData, session, instruction
  */
 function buildInitialInterviewPrompt({ candidate, curriculumData, session }) {
     const instruction = [
-        'Begin the interview with the candidate.',
-        'Use the candidate profile and learning context to ask an appropriate first technical question.',
-        'Keep the conversation adaptive and conversational.',
-        'Do not provide feedback yet.',
-        'Do not conclude the interview.',
-        'The first response should be a question that invites the candidate to demonstrate their understanding.',
+    'Begin the interview with the candidate.',
+    'Use the candidate profile and learning context to ask an appropriate first technical question.',
+    'Keep the conversation adaptive and conversational.',
+    'Ask exactly ONE primary interview question.',
+    'Do not bundle multiple questions into the first response.',
+    'Do not provide feedback yet.',
+    'Do not conclude the interview.',
+    'The first response should be a concise question that invites the candidate to demonstrate their understanding.',
     ].join(' ');
 
     return buildBasePromptSections(candidate, curriculumData, session, instruction);
@@ -325,9 +327,14 @@ function buildInterviewTurnPrompt({ candidate, curriculumData, session, latestMe
 
     const instruction = [
         'Continue the interview as the interviewer.',
-        'Acknowledge the candidate response and ask the next relevant question.',
+        'Acknowledge the candidate response briefly and ask the next relevant interview question.',
+        'Ask exactly ONE primary interview question in this turn.',
+        'Do not bundle multiple questions into one response.',
         'Preserve conversational continuity and do not restart the interview.',
-        'Use the candidate history, asked questions, and interview progress to decide what to ask next.',
+        'Use the candidate history, previously asked questions, answers, and interview progress to decide what to ask next.',
+        'Do not repeat a question that has already been asked.',
+        'Adapt the difficulty and topic based on the candidate response and curriculum context.',
+        'Keep the response concise and conversational.',
         'Do not provide final feedback yet.',
     ].join(' ');
 
@@ -345,12 +352,38 @@ function buildInterviewTurnPrompt({ candidate, curriculumData, session, latestMe
  */
 function buildFinalEvaluationPrompt({ candidate, curriculumData, session }) {
     const instruction = [
-        'You are evaluating the completed interview for this candidate.',
-        'Use the full interview history, candidate profile, and curriculum context to produce structured feedback.',
-        'Return only the evaluation prompt, not the final feedback content.',
-        'The future LLM should generate JSON with the fields: summary, strengths, gaps, and next.',
-        'Do not ask additional questions in this prompt.',
-    ].join(' ');
+    'Evaluate the candidate based ONLY on the interview conversation, candidate profile, and curriculum context provided above.',
+    
+    'Generate the actual final interview feedback now.',
+    
+    'Do not use placeholders, template text, angle brackets, ellipses, or example values.',
+    
+    'The summary must be a concise assessment of the candidate performance.',
+    
+    'The strengths array must contain actual strengths demonstrated by the candidate during the interview.',
+    
+    'The gaps array must contain only weaknesses or missing elements that are supported by the candidate responses to questions that were actually asked during the interview.',
+    
+    'Do not mark a topic as a gap merely because it exists in the curriculum but was not explicitly tested by an interview question.',
+    
+    'Do not penalize the candidate for failing to discuss topics that were never asked about.',
+    
+    'For each gap, base the gap on a specific question actually asked during the interview and the candidate answer to that question.',
+    
+    'If the candidate adequately answered the questions asked, do not invent additional gaps just to make the evaluation more critical.',
+    
+    'The next array must contain concrete and actionable recommendations based only on the identified gaps.',
+    
+    'Return only the structured feedback object required by the response schema.',
+    
+    'Do not ask another question.',
+    
+    'Base the evaluation only on candidate responses actually present in the interview history.',
+    
+    'Do not describe the evaluation process.',
+
+    'For every identified gap, cross-reference the candidate\'s answer with the corresponding question in the interview history. A gap is valid only when the question actually required that knowledge and the candidate\'s answer was incomplete, incorrect, vague, or technically weak.',
+].join(' ');
 
     return buildBasePromptSections(candidate, curriculumData, session, instruction);
 }

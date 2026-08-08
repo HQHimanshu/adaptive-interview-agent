@@ -115,53 +115,103 @@ describe('Interview Orchestration', () => {
     });
 
     it('COMPLETION -> drives interview to completion and records feedback', async () => {
-        const originalGen = llmService.generateInterviewResponse;
-        const originalCreateAdapter = breethServiceModule.createBreethCommandAdapter;
+    const originalGen = llmService.generateInterviewResponse;
+    const originalCreateAdapter =
+        breethServiceModule.createBreethCommandAdapter;
 
-        let calls = 0;
-        llmService.generateInterviewResponse = async () => {
-            calls += 1;
-            if (calls === 1) return 'Q1?';
-            if (calls === 2) return 'Q2?';
-            if (calls === 3) return 'Q3?';
-            // final evaluation reply (JSON)
-            return JSON.stringify({ summary: 'Test interview completed.', strengths: ['Strong communication'], gaps: ['Needs more system design depth'], next: ['Practice system design interviews'] });
-        };
+    let calls = 0;
 
-        breethServiceModule.createBreethCommandAdapter = () => ({ saveSessionMemory: async () => { }, updateSessionMemory: async () => { }, getSessionMemory: async () => null });
+    llmService.generateInterviewResponse = async () => {
+        calls += 1;
 
-        const app = loadApp();
-        const { server, url } = startServer(app);
-        try {
-            const sid = 'test-interview-complete-001';
-            const startPayload = { sessionId: sid, candidate: { member: { id: 'c-3', name: 'Finish' }, missions: [], signals: {} } };
-            const s1 = await postJson(url, '/api/interview', startPayload);
-            assert.strictEqual(s1.status, 200);
+        // Initial interview question
+        if (calls === 1) return 'Q1?';
 
-            // first continue
-            const c1 = await postJson(url, '/api/interview', { sessionId: sid, message: 'Answer 1' });
-            assert.strictEqual(c1.status, 200);
-            assert.strictEqual(c1.json.done, false);
-
-            // second continue -> should complete
-            const c2 = await postJson(url, '/api/interview', { sessionId: sid, message: 'Answer 2' });
-            assert.strictEqual(c2.status, 200);
-            assert.strictEqual(c2.json.done, true);
-            assert.strictEqual(c2.json.reply, 'Interview completed.');
-            assert.ok(c2.json.feedback);
-            assert.strictEqual(typeof c2.json.feedback.summary, 'string');
-            assert.ok(Array.isArray(c2.json.feedback.strengths));
-            assert.ok(Array.isArray(c2.json.feedback.gaps));
-            assert.ok(Array.isArray(c2.json.feedback.next));
-
-            const session = sessionManager.getSession(sid);
-            assert.strictEqual(session.status, 'COMPLETED');
-            assert.ok(session.feedback);
-        } finally {
-            llmService.generateInterviewResponse = originalGen;
-            breethServiceModule.createBreethCommandAdapter = originalCreateAdapter;
-            await closeServer(server);
+        // Interview questions
+        if (calls >= 2 && calls <= 8) {
+            return `Q${calls}?`;
         }
+
+        // Final evaluation
+        return JSON.stringify({
+            summary: 'Test interview completed.',
+            strengths: ['Strong communication'],
+            gaps: ['Needs more system design depth'],
+            next: ['Practice system design interviews'],
+        });
+    };
+
+    breethServiceModule.createBreethCommandAdapter = () => ({
+        saveSessionMemory: async () => {},
+        updateSessionMemory: async () => {},
+        getSessionMemory: async () => null,
+    });
+
+    const app = loadApp();
+    const { server, url } = startServer(app);
+
+    try {
+        const sid = 'test-interview-complete-001';
+
+        // START
+        const s1 = await postJson(url, '/api/interview', {
+            sessionId: sid,
+            candidate: {
+                member: {
+                    id: 'c-3',
+                    name: 'Finish',
+                },
+                missions: [],
+                signals: {},
+            },
+        });
+
+        assert.strictEqual(s1.status, 200);
+        assert.strictEqual(s1.json.done, false);
+
+        // Answer questions 1 through 8
+        let response;
+
+        for (let i = 1; i <= 8; i += 1) {
+            response = await postJson(url, '/api/interview', {
+                sessionId: sid,
+                message: `Answer ${i}`,
+            });
+
+            assert.strictEqual(response.status, 200);
+
+            if (i < 8) {
+                assert.strictEqual(response.json.done, false);
+            }
+        }
+
+        // 8th answer completes the interview
+        assert.strictEqual(response.json.done, true);
+        assert.strictEqual(response.json.reply, 'Interview completed.');
+
+        // Verify feedback
+        assert.ok(response.json.feedback);
+        assert.strictEqual(
+            typeof response.json.feedback.summary,
+            'string'
+        );
+        assert.ok(Array.isArray(response.json.feedback.strengths));
+        assert.ok(Array.isArray(response.json.feedback.gaps));
+        assert.ok(Array.isArray(response.json.feedback.next));
+
+        // Verify session state
+        const session = sessionManager.getSession(sid);
+
+        assert.strictEqual(session.status, 'COMPLETED');
+        assert.ok(session.feedback);
+
+        } finally {
+        llmService.generateInterviewResponse = originalGen;
+        breethServiceModule.createBreethCommandAdapter =
+            originalCreateAdapter;
+
+        await closeServer(server);
+       }
     });
 
     it('COMPLETED SESSION -> 400 on further messages', async () => {

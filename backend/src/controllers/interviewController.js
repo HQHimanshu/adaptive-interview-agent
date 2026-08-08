@@ -8,7 +8,7 @@ const { createBreethCommandAdapter, createBreethService } = require('../services
 
 const router = express.Router();
 
-const DEFAULT_TOTAL_QUESTIONS = 2;
+const DEFAULT_TOTAL_QUESTIONS = 8;
 
 function badRequest(res, message) {
     return res.status(400).json({ error: message });
@@ -135,18 +135,60 @@ router.post('/', async (req, res, next) => {
             const finalSession = getSession(sessionId);
             if (finalSession.progress.answeredQuestions >= (finalSession.progress.totalQuestions || DEFAULT_TOTAL_QUESTIONS)) {
                 // Final evaluation
-                updateProgress(sessionId, { currentQuestion: null });
-                markCompleted(sessionId);
 
                 const curriculumData2 = await loadCurriculumData();
                 const evalPrompt = buildFinalEvaluationPrompt({ candidate: finalSession.candidate, curriculumData: curriculumData2, session: finalSession });
-                const evalReply = await generateInterviewResponse(evalPrompt);
+                const evalReply = await generateInterviewResponse(evalPrompt, {
+                responseFormat: {
+                    type: 'json_schema',
+                    json_schema: {
+                    name: 'interview_feedback',
+                    strict: true,
+                    schema: {
+                        type: 'object',
+                        properties: {
+                        summary: {
+                            type: 'string',
+                        },
+                        strengths: {
+                            type: 'array',
+                            items: {
+                            type: 'string',
+                            },
+                        },
+                        gaps: {
+                            type: 'array',
+                            items: {
+                            type: 'string',
+                            },
+                        },
+                        next: {
+                            type: 'array',
+                            items: {
+                            type: 'string',
+                            },
+                        },
+                        },
+                        required: [
+                        'summary',
+                        'strengths',
+                        'gaps',
+                        'next',
+                        ],
+                        additionalProperties: false,
+                    },
+                    },
+                },
+                });
 
                 const feedback = parseFeedbackText(evalReply);
                 if (!feedback || typeof feedback.summary !== 'string' || !Array.isArray(feedback.strengths) || !Array.isArray(feedback.gaps) || !Array.isArray(feedback.next)) {
                     // If parsing failed, return server error
                     throw new Error('Failed to parse final feedback from LLM.');
                 }
+
+                updateProgress(sessionId, { currentQuestion: null });
+                markCompleted(sessionId);
 
                 // store feedback in session
                 updateSession(sessionId, { feedback });
