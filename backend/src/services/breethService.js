@@ -1,9 +1,6 @@
-const { execFile } = require('child_process');
-const { promisify } = require('util');
+const { createBreethMcpAdapter, DEFAULT_BREETH_SERVER } = require('./breethMcpAdapter');
 
-const execFileAsync = promisify(execFile);
-
-const DEFAULT_BREETH_SERVER = 'https://mcp.thebreeth.com/mcp';
+const DEFAULT_BREETH_SERVER_OVERRIDE = 'https://mcp.thebreeth.com/mcp';
 
 /**
  * @param {any} value
@@ -96,48 +93,13 @@ function validateSessionMemory(memory) {
 
 /**
  * @param {Object} [options]
- * @param {string} [options.command]
- * @param {string[]} [options.args]
- * @param {Object} [options.env]
- * @param {Function} [options.execFile]
+ * @param {string} [options.serverUrl]
+ * @param {string} [options.apiKey]
+ * @param {Function} [options.clientFactory]
  * @returns {{ saveSessionMemory: Function, getSessionMemory: Function, updateSessionMemory: Function }}
  */
-function createBreethCommandAdapter({ command = 'npx', args = [], env = process.env, execFile = execFileAsync } = {}) {
-    if (!command || typeof command !== 'string') {
-        throw new Error('Breeth adapter configuration error: command must be a non-empty string.');
-    }
-
-    if (!Array.isArray(args)) {
-        throw new Error('Breeth adapter configuration error: args must be an array.');
-    }
-
-    async function executeMcpRemote(extraArgs) {
-        const commandArgs = [...args, ...extraArgs];
-        const result = await execFile(command, commandArgs, { env });
-        return { stdout: result.stdout, stderr: result.stderr };
-    }
-
-    async function notImplemented(toolName) {
-        throw new Error(
-            `Breeth MCP tool integration is not implemented for '${toolName}'. ` +
-            'A documented Breeth tool name and payload format are required to complete this adapter.'
-        );
-    }
-
-    return {
-        async saveSessionMemory(memory) {
-            return notImplemented('saveSessionMemory');
-        },
-        async getSessionMemory(sessionId) {
-            return notImplemented('getSessionMemory');
-        },
-        async updateSessionMemory(sessionId, memory) {
-            return notImplemented('updateSessionMemory');
-        },
-        internal: {
-            executeMcpRemote,
-        },
-    };
+function createBreethCommandAdapter({ serverUrl, apiKey, clientFactory } = {}) {
+    return createBreethMcpAdapter({ serverUrl, apiKey, clientFactory });
 }
 
 /**
@@ -177,6 +139,7 @@ module.exports = {
     validateSessionId,
     validateSessionMemory,
     createBreethCommandAdapter,
+    createBreethMcpAdapter,
     createBreethService,
-    DEFAULT_BREETH_SERVER,
+    DEFAULT_BREETH_SERVER: DEFAULT_BREETH_SERVER_OVERRIDE,
 };

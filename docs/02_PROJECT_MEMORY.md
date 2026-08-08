@@ -33,7 +33,7 @@ Status: ✅ Completed
 - [x] Path Configuration
 - [x] Session Manager
 - [x] Prompt Builder
-- [ ] Breeth Service
+- [x] Breeth Service (MCP adapter implemented)
 - [x] LLM Service
 - [ ] Interview Controller
 - [ ] Feedback Generator

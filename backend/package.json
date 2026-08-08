@@ -7,9 +7,11 @@
     "scripts": {
         "start": "node server.js",
         "dev": "node --watch server.js",
-        "test": "node --test ./src/services/breethService.test.js"
+        "test": "node --test ./src/services/breethService.test.js",
+        "test:breeth-integration": "node ./test-breeth-integration.js"
     },
     "dependencies": {
+        "@modelcontextprotocol/client": "^2.0.0",
         "cors": "^2.8.2",
         "dotenv": "^16.4.2",
         "express": "^4.21.2",
