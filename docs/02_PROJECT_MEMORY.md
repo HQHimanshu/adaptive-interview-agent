@@ -63,9 +63,11 @@ Status: ✅ Completed
 
 ## Current Sprint
 
-Sprint 5
+## Project Status
 
-LLM Service
+Sprint 5 – LLM Service
+
+Status: ✅ Completed
 
 ---
 
@@ -80,7 +82,13 @@ Sprint 6 – Breeth Service
 - React frontend
 - Express backend
 - REST API
-- Breeth Memory
-- Claude/Gemini
-- Incremental commits
-- AI usage logging enabled
+- Breeth MCP for persistent memory
+- Groq as the LLM provider
+- Groq SDK for backend LLM communication
+- Model configured through environment variables
+- No authentication
+- JSON datasets provided by organizers
+- Client-provided sessionId is used for interview state
+- Incremental Git commits
+- AI usage documented throughout development
+- API keys stored only in local environment variables
