@@ -19,6 +19,7 @@ function notFound(res, message) {
 }
 
 function parseFeedbackText(text) {
+    if (text && typeof text === 'object') return text;
     if (!text || typeof text !== 'string') return null;
     // Try direct JSON
     try {
