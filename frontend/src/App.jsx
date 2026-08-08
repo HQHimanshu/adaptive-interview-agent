@@ -264,7 +264,8 @@ function MagneticLink({ className, children, href, ...props }) {
   );
 }
 
-import MoonScene from './MoonScene';
+import OrbitalMoon from './OrbitalMoon';
+import CurriculumSection from './CurriculumSection';
 
 function App() {
   const [cur, setCur] = useState(0);
@@ -411,7 +412,7 @@ function App() {
             </div>
 
             <div className="hero-moon-col">
-              <MoonScene />
+              <OrbitalMoon />
             </div>
           </div>
         </div>
@@ -426,64 +427,7 @@ function App() {
         </div>
       </section>
 
-      <section className="programs-section" id="programs" ref={progRef}>
-        <div className="prog-heading-row">
-          <div className="prog-clip-wrap">
-            <span className={`prog-title ${isProgIn ? 'in' : ''}`}>Programs.</span>
-          </div>
-          <div className={`prog-meta-right ${isProgIn ? 'in' : ''}`}>
-            <div className="prog-track-count">Available tracks</div>
-            <span className="prog-track-num">{programsData.length}</span>
-          </div>
-        </div>
-
-        <div className={`carousel-stage ${isProgIn ? 'in' : ''}`} role="region" aria-label="Program carousel">
-          <MagneticButton className="carousel-arrow" aria-label="Previous program" onClick={handlePrev}>←</MagneticButton>
-
-          <article key={cur} className={`program-card animate-${dir}`}>
-            <div className="program-topics">
-              <p className="program-topics-title">Sub-Topics · Day-wise Program</p>
-              {p.days.map((day, i) => (
-                <div key={i} className="day-row" style={{ animationDelay: `${200 + i * 60}ms` }}>
-                  <span className="day-num">{day.l}</span>
-                  <div className="day-content">
-                    <strong>{day.t}</strong>
-                    <small>{day.d}</small>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="program-meta">
-              <p className="program-meta-title">Program Details</p>
-              <div className="meta-row" style={{ animationDelay: '300ms' }}><span>Time</span><strong>{p.time}</strong></div>
-              <div className="meta-row" style={{ animationDelay: '360ms' }}><span>Conducted by</span><strong>{p.by}</strong><small>{p.note}</small></div>
-              <div className="meta-row" style={{ animationDelay: '420ms' }}><span>Description</span><small>{p.desc}</small></div>
-              
-              <div className="program-heading" style={{ animationDelay: '500ms' }}>
-                <span className="prog-pill">{p.tag}</span>
-                <h3 className="prog-h3">{p.title}</h3>
-              </div>
-              <div className="meta-spacer"></div>
-              <MagneticLink className="access-btn" href="/interview" style={{ animationDelay: '600ms' }}>Access to program →</MagneticLink>
-            </div>
-          </article>
-
-          <MagneticButton className="carousel-arrow" aria-label="Next program" onClick={handleNext}>→</MagneticButton>
-        </div>
-
-        <div className="carousel-indicators" role="tablist" style={{ marginTop: '24px' }}>
-          {programsData.map((_, i) => (
-            <button 
-              key={i} 
-              className={`carousel-dot ${i === cur ? 'active' : ''}`} 
-              onClick={() => setCur(i)} 
-              role="tab" 
-              aria-selected={i === cur}
-              aria-label={`Program ${i + 1}`} 
-            />
-          ))}
-        </div>
-      </section>
+      <CurriculumSection />
 
 
     </>
