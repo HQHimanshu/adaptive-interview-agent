@@ -118,8 +118,8 @@ The endpoint contract is implemented according to the technical specification an
 - [x] Breeth MCP integration
 - [x] Real integration testing
 - [x] Full backend testing
-- [ ] Interview Controller
-- [ ] Feedback Generator
+- [x] Interview Controller
+- [x] Feedback Generator
 - [ ] Frontend
 - [ ] Deployment
 - [ ] README Finalization
@@ -149,9 +149,67 @@ The endpoint contract is implemented according to the technical specification an
 
 ## Current Sprint
 
-Sprint 7 – Interview Orchestration
+---
+
+## Sprint 7.1 – Interview Agent Tuning & Verification
 
 Status: ✅ Completed
+
+### Interview Orchestration Improvements
+
+- Refined interview start and continuation flow
+- Ensured candidate responses are recorded before generating the next interview question
+- Ensured the final interview response is processed before final evaluation
+- Improved interview completion handling
+- Improved completed-session protection
+- Added validation for invalid requests
+- Added unknown-session handling
+- Verified structured final feedback generation
+
+### Final Evaluation Improvements
+
+- Tuned the final evaluation prompt to evaluate only the interview conversation, candidate profile, and curriculum context actually provided to the evaluator
+- Gaps must be supported by questions that were actually asked
+- Curriculum topics that were not tested are not treated as candidate gaps
+- Candidate answers are cross-referenced with the corresponding interview questions
+- Unsupported or invented weaknesses are discouraged
+- Recommendations are based only on identified gaps
+
+### Testing
+
+The interview orchestration test suite was executed using:
+
+node test-interview-orchestration.js
+
+Result:
+
+- 6 tests passed
+- 0 tests failed
+- Start flow verified
+- Continue flow verified
+- Completion flow verified
+- Completed-session rejection verified
+- Invalid-request handling verified
+- Unknown-session handling verified
+
+### Breeth Verification
+
+Breeth MCP integration was tested using the project's real integration path.
+
+The Breeth dashboard currently shows:
+
+- 23 writes
+- 1 retrieval
+- 0 intents
+- 0 knots
+
+Multiple tests were performed during development. The dashboard count is recorded exactly as observed rather than assuming every test resulted in a retrieval.
+
+### Current Backend Status
+
+The backend MVP orchestration layer is functionally verified.
+
+The remaining major development phase is frontend implementation and integration.
 
 ---
 

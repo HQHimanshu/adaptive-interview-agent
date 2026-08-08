@@ -1437,3 +1437,284 @@ Then report:
 - real Breeth integration test result
 - limitations
 - suggested Git commit message
+
+# Sprint 7.1 – Interview Agent Tuning & Hardening
+
+SPRINT 7.1 — COMPLETE INTERVIEW ORCHESTRATION TEST COVERAGE
+
+The core Interview Controller has been implemented and the current tests
+successfully verify:
+
+- START interview
+- CONTINUE interview
+- UNKNOWN SESSION -> 404
+
+However, Sprint 7 is NOT complete because the completion/final-feedback
+path and validation behavior have not been tested.
+
+The current test runner also does not terminate cleanly unless
+--test-force-exit is used.
+
+DO NOT redesign the Interview Controller.
+DO NOT change the existing service architecture.
+DO NOT start frontend or deployment work.
+
+
+OBJECTIVE
+
+
+Complete Sprint 7 testing and fix the test lifecycle issue.
+
+
+1. FIX TEST CLEANUP
+
+
+Inspect backend/test-interview-orchestration.js.
+
+Ensure every test properly cleans up its HTTP server and any resources it
+creates.
+
+Prefer:
+
+await new Promise((resolve, reject) => {
+    server.close((error) => {
+        if (error) reject(error);
+        else resolve();
+    });
+});
+
+or an equivalent clean async shutdown.
+
+Do not use process.exit() or test-force-exit as the solution.
+
+The normal command:
+
+node --test test-interview-orchestration.js
+
+must terminate naturally.
+
+
+2. ADD COMPLETION TEST
+
+
+Add a test that drives an interview until completion.
+
+Use a synthetic candidate.
+
+Use the existing DEFAULT_TOTAL_QUESTIONS behavior.
+
+Stub generateInterviewResponse so that:
+
+- the first call returns an interview question
+- the next interview call returns another question
+- the final evaluation call returns valid JSON:
+
+{
+  "summary": "Test interview completed.",
+  "strengths": ["Strong communication"],
+  "gaps": ["Needs more system design depth"],
+  "next": ["Practice system design interviews"]
+}
+
+The test must verify:
+
+HTTP status = 200
+
+done === true
+
+reply === "Interview completed."
+
+feedback exists
+
+feedback.summary is a string
+
+feedback.strengths is an array
+
+feedback.gaps is an array
+
+feedback.next is an array
+
+The session must have status COMPLETED.
+
+
+3. TEST COMPLETED SESSION
+
+
+After completing an interview, send another:
+
+POST /api/interview
+
+{
+  "sessionId": "<completed-session>",
+  "message": "Can I continue?"
+}
+
+Verify:
+
+HTTP 400
+
+Do not create another question.
+
+
+4. TEST INVALID REQUESTS
+
+
+Add tests for:
+
+A.
+
+{}
+
+Expected:
+
+400
+
+B.
+
+{
+  "message": "hello"
+}
+
+Expected:
+
+400 or the appropriate existing validation response because
+sessionId is missing.
+
+C.
+
+{
+  "sessionId": ""
+}
+
+Expected:
+
+400
+
+D.
+
+{
+  "sessionId": "some-session",
+  "message": ""
+}
+
+Expected:
+
+400
+
+Do not change the project's established error format merely for the tests.
+
+
+5. VERIFY BREETH IS MOCKED
+
+
+The automated orchestration tests must NOT consume real Breeth API calls.
+
+Use the existing Breeth adapter mocking approach.
+
+Verify that the test does not require:
+
+BREETH_API_KEY
+
+and does not contact:
+
+https://mcp.thebreeth.com/mcp
+
+The real Breeth integration remains in:
+
+test-breeth-integration.js
+
+
+6. VERIFY GROQ IS MOCKED
+
+
+The automated orchestration tests must not consume real Groq API calls.
+
+Use the existing llmService.generateInterviewResponse stubbing.
+
+Do not remove the existing real test:
+
+test-llm-service.js
+
+
+7. TEST STATE
+
+
+Verify that after a continuation:
+
+- candidate answer is recorded
+- assistant response is recorded
+- progress is updated
+- conversation history is preserved
+
+Verify that completion stores feedback in the session.
+
+
+8. TEST ISOLATION
+
+
+Each test must use a unique sessionId.
+
+Tests must restore:
+
+llmService.generateInterviewResponse
+
+and:
+
+breethServiceModule.createBreethCommandAdapter
+
+even if an assertion fails.
+
+Prefer try/finally where appropriate.
+
+
+9. RUN TESTS
+
+
+Run:
+
+node --test test-interview-orchestration.js
+
+The expected final result should be:
+
+tests: all expected tests
+pass: all expected tests
+fail: 0
+cancelled: 0
+
+And the process must return to the shell naturally without Ctrl+C.
+
+Do NOT use:
+
+--test-force-exit
+
+as the permanent solution.
+
+
+10. DOCUMENTATION
+
+
+Do NOT mark Sprint 7 completed until all tests pass normally.
+
+After the tests pass, update:
+
+docs/02_PROJECT_MEMORY.md
+docs/03_BACKEND_API.md
+docs/04_AI_USAGE_LOG.md
+PROMPTS.md
+
+Record the actual tests that were implemented and passed.
+
+Do not claim tests passed unless they actually passed.
+
+
+STOP CONDITION
+
+
+After completing the tests and cleanup:
+
+1. Run the test suite.
+2. Show the complete test result.
+3. Show files changed.
+4. Do not commit.
+5. Do not push.
+6. Do not start Sprint 8.
