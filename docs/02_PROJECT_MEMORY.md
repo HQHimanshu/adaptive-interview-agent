@@ -2,7 +2,7 @@
 
 ## Project Status
 
-Sprint 5 – LLM Service
+Sprint 6 – Breeth MCP Integration
 
 Status: ✅ Completed
 
@@ -19,6 +19,11 @@ Status: ✅ Completed
 - Candidate dataset added
 - Backend initialized
 - Data Layer completed
+- Session Manager implemented
+- Prompt Builder implemented
+- Groq LLM Service implemented
+- Breeth MCP integration implemented
+- Real Breeth write/read integration tested
 
 ---
 
@@ -33,7 +38,7 @@ Status: ✅ Completed
 - [x] Path Configuration
 - [x] Session Manager
 - [x] Prompt Builder
-- [x] Breeth Service (MCP adapter implemented)
+- [x] Breeth Service / MCP Adapter
 - [x] LLM Service
 - [ ] Interview Controller
 - [ ] Feedback Generator
@@ -51,29 +56,72 @@ Status: ✅ Completed
 
 ---
 
+## Breeth MCP Integration
+
+Status: ✅ Completed
+
+- MCP client SDK installed
+- Breeth MCP server connected
+- BREETH_API_KEY loaded from local environment
+- add_episode integration implemented
+- search integration implemented
+- Deterministic session group IDs implemented
+- Synthetic test session used for integration testing
+- Real Breeth write tested successfully
+- Real Breeth retrieval tested successfully
+- Breeth dashboard activity verified
+- API key excluded from source control
+
+---
+
+## LLM Integration
+
+Status: ✅ Completed
+
+- Groq SDK installed
+- Groq client implemented
+- GROQ_API_KEY loaded from local environment
+- GROQ_MODEL configured through environment variables
+- Initial interview prompt tested
+- Interview turn prompt tested
+- Final evaluation prompt tested
+- Real Groq completion tested successfully
+
+---
+
+## Current API
+
+### POST /api/interview
+
+Status: ⚠️ Contract defined, controller integration pending
+
+The endpoint must support:
+
+1. Starting a new interview using `sessionId` and candidate data.
+2. Continuing an existing interview using `sessionId` and candidate message.
+3. Returning `reply` and `done`.
+4. Returning structured feedback when the interview is complete.
+
+The endpoint contract is defined in the technical specification and
+`docs/03_BACKEND_API.md`.
+
+---
+
 ## Infrastructure
 
 - [x] Repository
 - [x] Documentation
+- [x] Backend initialization
+- [x] Data layer
+- [x] Prompt builder
+- [x] Groq LLM integration
+- [x] Breeth MCP integration
+- [x] Real integration testing
+- [ ] Full backend testing
+- [ ] Frontend
 - [ ] Deployment
-- [ ] Testing
 - [ ] README Finalization
-
----
-
-## Current Sprint
-
-## Project Status
-
-Sprint 5 – LLM Service
-
-Status: ✅ Completed
-
----
-
-## Next Sprint
-
-Sprint 6 – Breeth Service
+- [ ] PROMPTS.md Finalization
 
 ---
 
@@ -88,7 +136,68 @@ Sprint 6 – Breeth Service
 - Model configured through environment variables
 - No authentication
 - JSON datasets provided by organizers
-- Client-provided sessionId is used for interview state
+- Client-provided `sessionId` is used for interview state
+- Deterministic Breeth group IDs based on session ID
+- Append-oriented memory strategy for interview state
+- API keys stored only in local environment variables
 - Incremental Git commits
 - AI usage documented throughout development
-- API keys stored only in local environment variables
+
+---
+
+## Current Sprint
+
+Sprint 6 – Breeth MCP Integration
+
+Status: ✅ Completed
+
+---
+
+## Next Sprint
+
+Sprint 7 – Interview Orchestration
+
+### Objectives
+
+- Implement Interview Controller
+- Connect Session Manager to the interview flow
+- Connect Prompt Builder to the LLM Service
+- Connect Breeth memory to interview state
+- Implement start-interview flow
+- Implement conversation-turn flow
+- Detect interview completion
+- Implement final evaluation flow
+- Connect Feedback Generator
+- Return responses according to the `/api/interview` contract
+- Add backend integration tests
+
+---
+
+## Sprint 7 Architecture
+
+```text
+POST /api/interview
+        |
+        v
+Interview Controller
+        |
+        +------------------+
+        |                  |
+        v                  v
+Session Manager       Candidate/Curriculum
+        |
+        v
+Breeth Memory
+        |
+        v
+Prompt Builder
+        |
+        v
+Groq LLM Service
+        |
+        v
+Interview Response
+        |
+        +----> Session Update
+        |
+        +----> Breeth Memory

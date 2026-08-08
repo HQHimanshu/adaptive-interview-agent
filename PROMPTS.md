@@ -743,3 +743,682 @@ Before making changes, briefly state:
 3. How the implementation will fit the existing architecture.
 
 Then implement the sprint.
+
+# SPRINT 6 — BREETH MEMORY SERVICE
+
+You are working inside the existing Adaptive Interview Agent repository.
+
+IMPORTANT:
+This is Sprint 6 only.
+Do NOT implement Sprint 7 or any later feature.
+Do NOT implement the interview controller.
+Do NOT implement frontend code.
+Do NOT implement deployment.
+Do NOT rewrite existing working services unnecessarily.
+
+Before making changes:
+
+1. Read:
+   - AI_PROJECT_CONTEXT.md
+   - technical-spec.md
+   - docs/01_ARCHITECTURE.md
+   - docs/02_PROJECT_MEMORY.md
+   - docs/03_BACKEND_API.md
+   - docs/04_AI_USAGE_LOG.md
+   - PROMPTS.md
+   - backend/package.json
+   - backend/src/services/sessionManager.js
+   - backend/src/services/promptBuilder.js
+   - backend/src/services/llmService.js
+   - existing backend tests
+
+2. Understand the existing architecture before writing code.
+
+CURRENT ARCHITECTURE:
+
+Frontend:
+- React
+- Tailwind CSS
+- Axios
+
+Backend:
+- Node.js
+- Express
+- REST API
+
+Data:
+- candidates.json
+- curriculum.json
+
+Services already implemented:
+- Candidate Loader
+- Curriculum Loader
+- Data Cache
+- Session Manager
+- Prompt Builder
+- Groq LLM Service
+
+LLM:
+- Groq
+- Configurable model through environment variables
+- GROQ_API_KEY must never be hardcoded
+
+Memory:
+- Breeth MCP
+- Sprint 6 will implement the Breeth integration layer.
+
+OBJECTIVE:
+
+Create a reusable Breeth memory service that allows the backend to persist and retrieve interview-related memory using Breeth.
+
+The service must be isolated from Express routes and the Interview Controller.
+
+The service should provide a clean abstraction such as:
+
+- initialize/configure Breeth connection
+- save interview/session memory
+- retrieve memory for a session
+- optionally update existing session memory
+- handle unavailable/malformed Breeth responses safely
+
+IMPORTANT BREETH REQUIREMENT:
+
+The organizers have provided Breeth API access and an MCP configuration.
+
+Use the provided Breeth integration mechanism/documentation rather than inventing undocumented endpoints or request formats.
+
+Do NOT assume a REST endpoint exists if the supplied Breeth MCP interface does not expose one.
+
+First inspect the available Breeth MCP tools/integration information and determine the correct mechanism for:
+- storing memory
+- retrieving memory
+- identifying the interview/session memory
+
+If the MCP integration is not directly callable from the Node.js backend yet, do NOT fake an implementation.
+
+Instead:
+1. Create the service abstraction/interface.
+2. Document exactly what Breeth operation is required.
+3. Add a clearly isolated adapter/integration point.
+4. Keep the rest of the backend independent of the transport mechanism.
+
+SESSION MEMORY MODEL:
+
+Use the existing sessionId as the primary interview-session identifier.
+
+Do NOT generate a second unrelated interview identifier.
+
+Breeth memory should conceptually contain information such as:
+
+{
+  sessionId,
+  candidateId,
+  candidateProfile,
+  interviewState,
+  askedQuestions,
+  answers,
+  conversationHistory,
+  progress,
+  createdAt,
+  updatedAt
+}
+
+Do not store secrets in memory.
+
+Do not store the GROQ_API_KEY.
+
+Do not store the Breeth API key.
+
+SERVICE DESIGN:
+
+Create a dedicated service, for example:
+
+backend/src/services/breethService.js
+
+Use the project's existing module style and naming conventions.
+
+The service should expose a small, stable interface.
+
+Prefer functions such as:
+
+- saveSessionMemory(...)
+- getSessionMemory(...)
+- updateSessionMemory(...)
+
+Use appropriate validation.
+
+Handle:
+- missing sessionId
+- missing candidateId where required
+- malformed memory payload
+- unavailable Breeth integration
+- empty memory results
+- provider/API errors
+
+Do not expose provider-specific details to callers unnecessarily.
+
+ERROR HANDLING:
+
+Errors should be descriptive but must never expose:
+- API keys
+- authorization headers
+- secrets
+- full sensitive provider responses
+
+TESTING:
+
+Create a focused Breeth service test.
+
+The test must distinguish between:
+
+1. configuration/validation testing
+2. real Breeth integration testing
+
+Do NOT silently claim a real Breeth call succeeded if it was only mocked.
+
+If the provided MCP environment cannot be invoked from the Node.js test environment, create a safe adapter-level test and clearly document that the real MCP operation still requires integration through the supported runtime.
+
+Do not introduce a fake Breeth API.
+
+Do not invent URLs.
+
+ENVIRONMENT:
+
+If configuration is required, use environment variables.
+
+Never commit actual credentials.
+
+Update/create an appropriate .env.example if needed.
+
+Do not modify .gitignore unless necessary.
+
+DOCUMENTATION:
+
+Update:
+
+docs/02_PROJECT_MEMORY.md
+docs/04_AI_USAGE_LOG.md
+PROMPTS.md
+
+Record:
+- Sprint 6 objective
+- Breeth integration architecture
+- files created/modified
+- testing performed
+- whether the Breeth call was real, mocked, or adapter-only
+- human verification performed
+
+IMPORTANT:
+
+Do not mark Sprint 6 as completed until the implementation and tests have actually been verified.
+
+Do not modify the existing Groq LLM implementation unless required for compatibility.
+
+Do not modify the Prompt Builder unless absolutely necessary.
+
+Do not modify the frontend.
+
+Do not create the Interview Controller.
+
+STOP CONDITION:
+
+After implementing and testing the Breeth service, stop.
+
+Then report:
+
+1. Files created
+2. Files modified
+3. Breeth integration mechanism used
+4. Whether a real Breeth operation was successfully tested
+5. Test commands executed
+6. Test results
+7. Any limitations
+8. Suggested Git commit message
+
+Do not continue to Sprint 7.
+
+The hackathon organizers provided the following Breeth MCP configuration:
+
+{
+  "mcpServers": {
+    "breeth": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.thebreeth.com/mcp",
+        "--header",
+        "Authorization: APIKey <REDACTED>"
+      ]
+    }
+  }
+}
+
+This is the MCP configuration supplied by the organizers.
+
+Use it as the reference for understanding how Breeth is intended to be accessed.
+
+IMPORTANT:
+- The actual API key is stored locally and must never be included in source code, prompts, Git commits, logs, or documentation.
+- Do not invent Breeth endpoints or MCP tool names.
+- Inspect/verify the available Breeth MCP interface before implementing calls.
+- If the current Node.js backend cannot directly invoke MCP tools using the available project setup, create a clean adapter boundary rather than faking the integration.
+
+Your application
+      ↓
+MCP Remote
+      ↓
+https://mcp.thebreeth.com/mcp
+      ↓
+Breeth
+
+# SPRINT 6.1 — COMPLETE THE REAL BREETH MCP ADAPTER
+
+Sprint 6 previously created the Breeth service abstraction, but the current
+Breeth command adapter intentionally contains placeholder notImplemented()
+methods.
+
+We now have the official Breeth MCP tool definitions.
+
+DO NOT invent tool names or payload formats.
+
+Official Breeth MCP tools:
+
+1. add_episode
+   Arguments:
+   - content: string, required
+   - group_id: string, optional, default "default"
+   - extract_intent: boolean, optional, default false
+
+2. record_fact
+   Arguments:
+   - subject: string, required
+   - predicate: string, required
+   - object: string, required
+   - group_id: string, optional, default "default"
+   - extract_intent: boolean, optional, default false
+
+3. search
+   Arguments:
+   - query: string, required
+   - group_id: string, optional, default "default"
+   - limit: integer, optional, 1–100
+
+4. retract
+   Arguments:
+   - edge_uuid: string, required
+   - reason: string, optional
+
+For our interview agent we primarily need:
+
+add_episode
+search
+
+Do not implement retract unless it is genuinely useful and easy to isolate.
+Do not use record_fact unless there is a clear structured-memory use case.
+
+
+OBJECTIVE :
+
+
+Replace the placeholder Breeth MCP adapter with a real MCP client
+implementation.
+
+Current architecture:
+
+Interview/session logic
+        ↓
+Breeth Service
+        ↓
+Breeth Memory Adapter
+        ↓
+MCP Client
+        ↓
+Breeth MCP server
+
+The Breeth service API must remain stable:
+
+- saveSessionMemory(memory)
+- getSessionMemory(sessionId)
+- updateSessionMemory(sessionId, memory)
+
+Do not rewrite BreethService validation unnecessarily.
+
+
+MCP CONNECTION :
+
+
+The Breeth MCP endpoint is:
+
+https://mcp.thebreeth.com/mcp
+
+The hackathon-provided configuration uses:
+
+npx
+mcp-remote
+https://mcp.thebreeth.com/mcp
+--header
+Authorization: APIKey <credential>
+
+The actual API key must NEVER be hardcoded.
+
+Use the local environment variable:
+
+BREETH_API_KEY
+
+If the current MCP client implementation can connect directly to the remote
+Streamable HTTP endpoint while attaching the Authorization header, prefer that.
+
+Use the official MCP TypeScript client SDK.
+
+Do not create custom JSON-RPC code unless the SDK cannot support the required
+operation.
+
+
+DEPENDENCY :
+
+
+Use:
+
+@modelcontextprotocol/client
+
+Do not use a random third-party MCP client.
+
+Inspect the installed package/API before implementing.
+
+
+AUTHENTICATION :
+
+
+The real API key must come from:
+
+process.env.BREETH_API_KEY
+
+Never log it.
+
+Never include it in:
+- source files
+- tests
+- PROMPTS.md
+- README
+- Git commits
+- error messages
+
+The MCP endpoint URL may be configured using:
+
+BREETH_SERVER
+
+with this default:
+
+https://mcp.thebreeth.com/mcp
+
+
+MCP CLIENT BEHAVIOR :
+
+
+The adapter should:
+
+1. Create an MCP Client.
+2. Connect using Streamable HTTP transport.
+3. Attach the Breeth API key as the Authorization header.
+4. Optionally discover available tools using listTools().
+5. Verify that required tools exist:
+   - add_episode
+   - search
+6. Call the appropriate tool using callTool().
+7. Normalize the returned result for the Breeth service.
+
+Do not blindly assume the tools exist.
+If listTools() reports that add_episode or search is missing,
+return a clear integration error.
+
+
+MEMORY MAPPING :
+
+
+Our existing memory object contains:
+
+{
+  sessionId,
+  candidateId,
+  candidateProfile,
+  conversationHistory,
+  askedQuestions,
+  answers,
+  progress
+}
+
+Breeth add_episode expects prose content.
+
+Therefore convert the session memory into concise, meaningful prose.
+
+For example:
+
+"Interview session <sessionId> for candidate <candidateId>.
+Candidate profile: ...
+Interview progress: ...
+Questions asked: ...
+Candidate answers: ...
+Conversation history: ..."
+
+Do NOT dump arbitrary JavaScript objects into Breeth.
+
+Do NOT store:
+- GROQ_API_KEY
+- BREETH_API_KEY
+- Authorization headers
+- system secrets
+
+Use a stable group_id such as:
+
+interview:<sessionId>
+
+if Breeth accepts that value as a group namespace.
+
+However, verify the group_id format supported by the actual tool and
+keep it deterministic.
+
+
+SAVE :
+
+
+saveSessionMemory(memory) should call:
+
+add_episode
+
+with:
+
+{
+  content: <serialized interview memory>,
+  group_id: <stable session group>,
+  extract_intent: false
+}
+
+Do not enable extract_intent for every interview turn.
+
+This is an interview memory system, not an intent-analysis experiment.
+
+
+RETRIEVAL :
+
+
+getSessionMemory(sessionId) should call:
+
+search
+
+with a focused natural-language query containing the session identifier,
+for example:
+
+"Interview session <sessionId> candidate interview history questions answers progress"
+
+Use the appropriate group_id and a reasonable limit.
+
+Do not assume the returned search structure is identical to the original
+memory object.
+
+Normalize the returned Breeth result into a useful memory representation.
+
+If no memory is found, return null or the project's established empty-memory
+convention.
+
+
+UPDATE :
+
+
+Breeth's documented MCP tools do not expose an "update episode" tool.
+
+Therefore DO NOT invent updateSessionMemory as a Breeth update API.
+
+For updateSessionMemory():
+
+Option A:
+Store a new episode representing the updated interview state.
+
+Option B:
+If the existing architecture makes update unnecessary at this stage,
+document that update is implemented as an append-only memory event.
+
+Prefer append-only memory because Breeth is an episode/memory system.
+
+The important requirement is:
+DO NOT pretend an update endpoint exists.
+
+
+TESTING :
+
+
+Create two test layers.
+
+1. Unit/adapter tests:
+   Mock the MCP client's:
+   - connect()
+   - listTools()
+   - callTool()
+
+   Verify:
+   - add_episode is called with the expected payload.
+   - search is called with the expected payload.
+   - missing tools are detected.
+   - provider errors are converted into controlled errors.
+   - secrets are never included in errors.
+
+2. REAL INTEGRATION TEST:
+
+Create a clearly separated test that runs only when:
+
+BREETH_API_KEY
+
+is available.
+
+The integration test must:
+
+1. Connect to the real Breeth MCP endpoint.
+2. List available tools.
+3. Confirm add_episode exists.
+4. Confirm search exists.
+5. Write ONE small test memory using add_episode.
+6. Search for that test memory.
+7. Print only safe response information.
+8. Never print the API key.
+
+Do not run this integration test automatically as part of normal unit tests.
+
+Use a separate command such as:
+
+node test-breeth-integration.js
+
+The integration test should clearly state that it performs a real Breeth
+write/read operation.
+
+
+SAFETY :
+
+
+Do not use real candidate data for the first Breeth integration test.
+
+Use a synthetic test candidate such as:
+
+candidateId:
+BREETH-TEST-001
+
+sessionId:
+breeth-test-session-001
+
+Do not use Sarah Johnson or any organizer-provided candidate for the
+integration test.
+
+
+ENVIRONMENT :
+
+
+Update:
+
+backend/.env.example
+
+with:
+
+BREETH_API_KEY=
+BREETH_SERVER=https://mcp.thebreeth.com/mcp
+
+Do not modify backend/.env with fake values.
+
+Do not expose the real API key.
+
+
+DOCUMENTATION :
+
+
+Update:
+
+docs/02_PROJECT_MEMORY.md
+docs/04_AI_USAGE_LOG.md
+PROMPTS.md
+
+Record:
+
+- Breeth MCP tools discovered.
+- add_episode selected for writes.
+- search selected for retrieval.
+- MCP client implementation.
+- Whether real integration testing succeeded.
+- The exact test command used.
+- Any limitations.
+
+Do not claim Breeth integration is complete until the real integration test
+has actually succeeded.
+
+
+IMPORTANT :
+
+
+Do not modify:
+
+- frontend
+- Groq LLM service
+- Prompt Builder
+- Interview Controller
+- Express API routes
+
+unless a minimal compatibility change is absolutely required.
+
+Do not proceed to Sprint 7.
+
+STOP after:
+
+1. MCP client implementation
+2. Breeth adapter implementation
+3. Unit tests
+4. Separate real integration test
+5. Documentation
+
+Then report:
+
+- files created
+- files modified
+- installed dependencies
+- discovered MCP tools
+- exact MCP transport used
+- unit test results
+- real Breeth integration test result
+- limitations
+- suggested Git commit message
