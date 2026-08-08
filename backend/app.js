@@ -6,6 +6,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 
 const healthRouter = require('./src/routes/health');
+const interviewRouter = require('./src/routes/interview');
 const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRouter);
+app.use('/api/interview', interviewRouter);
 
 app.use(errorHandler);
 

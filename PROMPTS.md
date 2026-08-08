@@ -1408,6 +1408,21 @@ STOP after:
 1. MCP client implementation
 2. Breeth adapter implementation
 3. Unit tests
+
+# Sprint 7 – Interview Orchestration
+
+This sprint implements the interview orchestration layer in the backend using the existing service stack.
+The implementation exposes `POST /api/interview` and coordinates:
+- Session Manager
+- Candidate and curriculum loader
+- Prompt Builder
+- Groq LLM Service
+- Breeth memory persistence
+
+Testing and verification:
+- Added integration tests for start, continue, and unknown session flows
+- Confirmed the existing backend test suite still passes
+- Ensured the API returns the required `reply`, `done`, and final feedback fields without exposing internal prompts or secrets
 4. Separate real integration test
 5. Documentation
 

@@ -40,7 +40,7 @@ Status: ✅ Completed
 - [x] Prompt Builder
 - [x] Breeth Service / MCP Adapter
 - [x] LLM Service
-- [ ] Interview Controller
+- [x] Interview Controller
 - [ ] Feedback Generator
 
 ---
@@ -93,16 +93,16 @@ Status: ✅ Completed
 
 ### POST /api/interview
 
-Status: ⚠️ Contract defined, controller integration pending
+Status: ✅ Implemented and tested
 
-The endpoint must support:
+The endpoint supports:
 
 1. Starting a new interview using `sessionId` and candidate data.
 2. Continuing an existing interview using `sessionId` and candidate message.
 3. Returning `reply` and `done`.
 4. Returning structured feedback when the interview is complete.
 
-The endpoint contract is defined in the technical specification and
+The endpoint contract is implemented according to the technical specification and
 `docs/03_BACKEND_API.md`.
 
 ---
@@ -117,7 +117,9 @@ The endpoint contract is defined in the technical specification and
 - [x] Groq LLM integration
 - [x] Breeth MCP integration
 - [x] Real integration testing
-- [ ] Full backend testing
+- [x] Full backend testing
+- [ ] Interview Controller
+- [ ] Feedback Generator
 - [ ] Frontend
 - [ ] Deployment
 - [ ] README Finalization
@@ -147,7 +149,7 @@ The endpoint contract is defined in the technical specification and
 
 ## Current Sprint
 
-Sprint 6 – Breeth MCP Integration
+Sprint 7 – Interview Orchestration
 
 Status: ✅ Completed
 
@@ -155,21 +157,14 @@ Status: ✅ Completed
 
 ## Next Sprint
 
-Sprint 7 – Interview Orchestration
+Sprint 8 – TBD
 
 ### Objectives
 
-- Implement Interview Controller
-- Connect Session Manager to the interview flow
-- Connect Prompt Builder to the LLM Service
-- Connect Breeth memory to interview state
-- Implement start-interview flow
-- Implement conversation-turn flow
-- Detect interview completion
-- Implement final evaluation flow
-- Connect Feedback Generator
-- Return responses according to the `/api/interview` contract
-- Add backend integration tests
+- Stabilize interview flow
+- Improve session persistence
+- Add frontend integration
+- Prepare deployment and monitoring
 
 ---
 

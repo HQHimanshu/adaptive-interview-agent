@@ -217,19 +217,23 @@ The exact internal session representation is an implementation detail and is not
 
 # Error Handling
 
-The technical specification does not define a complete error-response schema.
+The implementation returns controlled validation errors for invalid requests.
 
-The implementation should therefore keep error handling consistent with the backend architecture without inventing additional API behavior that conflicts with the specification.
+Common conditions include:
 
-Potential validation conditions include:
-
-- Missing `sessionId`
+- Missing or empty `sessionId`
 - Invalid request structure
-- Missing candidate on the initial request
-- Missing message on a conversation turn
+- Missing `candidate` on the initial request
+- Missing `message` on a conversation turn
 - Session not found when attempting to continue an existing interview
+- Attempting to continue a completed interview
 
-The exact HTTP status codes and error response structure should be finalized during backend implementation.
+### Error responses
+
+- `400 Bad Request` for invalid input or business rule violations
+- `404 Not Found` for unknown sessions when continuing an interview
+
+The exact HTTP status codes and error response structure are consistent with the backend implementation and do not expose internal stack traces or secrets.
 
 ---
 
