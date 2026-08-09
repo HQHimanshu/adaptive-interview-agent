@@ -41,17 +41,17 @@ Status: ✅ Completed
 - [x] Breeth Service / MCP Adapter
 - [x] LLM Service
 - [x] Interview Controller
-- [ ] Feedback Generator
+- [x] Feedback Generator
 
 ---
 
 ## Frontend Progress
 
-- [ ] Initialize React
-- [ ] Landing Page
-- [ ] Candidate Selector
-- [ ] Chat Interface
-- [ ] Feedback Screen
+- [x] Initialize React
+- [x] Landing Page
+- [x] Candidate Selector
+- [x] Chat Interface
+- [x] Feedback Screen
 - [ ] API Integration
 
 ---

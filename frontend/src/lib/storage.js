@@ -17,9 +17,9 @@ export function generateSessionId() {
   return 'ABT-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-export function createSession(candidateData) {
+export function createSession(candidateData, customSessionId = null) {
   const sessions = getStorage();
-  const sessionId = generateSessionId();
+  const sessionId = customSessionId || generateSessionId();
   
   const newSession = {
     id: sessionId,

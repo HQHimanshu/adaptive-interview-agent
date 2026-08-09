@@ -19,7 +19,12 @@ export const api = {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData?.error) errMessage = errData.error;
+        } catch (_) {}
+        throw new Error(errMessage);
       }
 
       return await response.json();
@@ -49,7 +54,12 @@ export const api = {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData?.error) errMessage = errData.error;
+        } catch (_) {}
+        throw new Error(errMessage);
       }
 
       return await response.json();

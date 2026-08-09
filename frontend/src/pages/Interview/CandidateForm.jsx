@@ -1,81 +1,106 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createSession } from '../../lib/storage';
+import { useInterview } from '../../context/InterviewContext';
 import curriculumData from '../../data/curriculum.json';
 import './CandidateForm.css';
-
-const UserIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-);
-
-const MailIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-);
-
-const BriefcaseIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-);
-
-const ClockIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-);
-
-const TargetIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-);
 
 const ArrowRightIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
 );
 
-const levels = ['Entry', 'Junior', 'Mid', 'Senior', 'Lead'];
-
 const CandidateForm = () => {
   const navigate = useNavigate();
+  const { startNewSession } = useInterview();
   
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    role: 'AI Engineer',
-    experience: 'Mid',
-    focusAreas: [curriculumData.modules[0].title]
+    jobRole: '',
+    yearsExperience: '3',
+    education: ''
   });
   
+  // Default to selecting days from Module 1 & 2 or first 6 days
+  const [selectedDayIds, setSelectedDayIds] = useState([1, 2, 3, 7, 8, 10, 12, 16]);
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError('');
   };
 
-  const handleLevelSelect = (level) => {
-    setFormData(prev => ({ ...prev, experience: level }));
-  };
-
-  const handleFocusAreaToggle = (title) => {
-    setFormData(prev => {
-      const current = prev.focusAreas;
-      if (current.includes(title)) {
-        if (current.length === 1) return prev; // Ensure at least one is selected
-        return { ...prev, focusAreas: current.filter(t => t !== title) };
+  const handleDayToggle = (dayNumber) => {
+    setSelectedDayIds(prev => {
+      if (prev.includes(dayNumber)) {
+        if (prev.length === 1) return prev; // Keep at least one mission selected
+        return prev.filter(id => id !== dayNumber);
       } else {
-        return { ...prev, focusAreas: [...current, title] };
+        return [...prev, dayNumber].sort((a, b) => a - b);
       }
     });
   };
 
+  const selectAllMissions = () => {
+    setSelectedDayIds(curriculumData.days.map(d => d.day));
+  };
+
+  const selectFoundationMissions = () => {
+    setSelectedDayIds([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim()) {
-      setError('Please fill out your name and email.');
+    if (!formData.name.trim()) {
+      setError('Please enter your full name.');
       return;
     }
+    if (!formData.jobRole.trim()) {
+      setError('Please enter your target or current job role.');
+      return;
+    }
+    if (!formData.education.trim()) {
+      setError('Please enter your educational background.');
+      return;
+    }
+
+    const selectedMissions = curriculumData.days
+      .filter(d => selectedDayIds.includes(d.day))
+      .map(d => ({
+        day: d.day,
+        title: d.title,
+        passed: true,
+        attempts: 1
+      }));
+
+    const candidatePayload = {
+      member: {
+        id: `CAND-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        name: formData.name.trim(),
+        jobRole: formData.jobRole.trim(),
+        yearsExperience: Number(formData.yearsExperience) || 1,
+        education: formData.education.trim(),
+        status: 'ACTIVE'
+      },
+      missions: selectedMissions,
+      signals: {
+        commitDays: Math.min(Math.max(selectedMissions.length * 3, 5), 31),
+        missionsCompleted: selectedMissions.length,
+        missionsFirstTry: selectedMissions.length
+      }
+    };
+
+    // Generate deterministic session ID
+    const sessionId = 'ABT-' + Math.random().toString(36).substring(2, 8).toUpperCase();
     
-    // Create session in mock DB
-    const session = createSession(formData);
+    // Save to local storage
+    createSession(candidatePayload, sessionId);
     
-    // Navigate to interview session with ID
-    navigate(`/interview/session?id=${session.id}`);
+    // Update context
+    startNewSession(sessionId, candidatePayload);
+    
+    // Navigate to interview session
+    navigate(`/interview/session?id=${sessionId}`);
   };
 
   return (
@@ -89,54 +114,111 @@ const CandidateForm = () => {
         </p>
         
         <form onSubmit={handleSubmit} className="candidate-form">
-          <div className="form-group">
-            <label className="form-label"><UserIcon /> FULL NAME</label>
-            <input type="text" name="name" value={formData.name} onChange={handleChange} className="form-input" placeholder=" " required />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label"><MailIcon /> EMAIL</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-input" placeholder="you@email.com" required />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label"><BriefcaseIcon /> TARGET ROLE</label>
-            <input type="text" name="role" value={formData.role} onChange={handleChange} className="form-input" />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label"><ClockIcon /> EXPERIENCE LEVEL</label>
-            <div className="level-selector">
-              {levels.map(level => (
-                <button type="button" key={level} onClick={() => handleLevelSelect(level)} className={`level-btn ${level === formData.experience ? 'active' : ''}`}>
-                  {level}
-                </button>
-              ))}
+          {/* Profile Details Section */}
+          <div className="form-section">
+            <h2 className="section-title-sm">Profile Details</h2>
+            
+            <div className="form-group">
+              <label className="form-label-clean">Full Name</label>
+              <input 
+                type="text" 
+                name="name" 
+                value={formData.name} 
+                onChange={handleChange} 
+                className="form-input-clean" 
+                placeholder="e.g. Jane Doe" 
+                required 
+              />
             </div>
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label"><TargetIcon /> FOCUS AREAS</label>
-            <div className="focus-area-selector">
-              {curriculumData.modules.map(mod => {
-                const isActive = formData.focusAreas.includes(mod.title);
-                return (
-                  <button 
-                    type="button" 
-                    key={mod.n} 
-                    onClick={() => handleFocusAreaToggle(mod.title)} 
-                    className={`focus-btn ${isActive ? 'active' : ''}`}
-                  >
-                    Module {mod.n}: {mod.title}
-                  </button>
-                );
-              })}
+            
+            <div className="form-group">
+              <label className="form-label-clean">Job Role</label>
+              <input 
+                type="text" 
+                name="jobRole" 
+                value={formData.jobRole} 
+                onChange={handleChange} 
+                className="form-input-clean" 
+                placeholder="e.g. Frontend Developer" 
+                required 
+              />
+            </div>
+            
+            <div className="form-row-2col">
+              <div className="form-group">
+                <label className="form-label-clean">Years Experience</label>
+                <input 
+                  type="number" 
+                  name="yearsExperience" 
+                  value={formData.yearsExperience} 
+                  onChange={handleChange} 
+                  className="form-input-clean" 
+                  placeholder="e.g. 3" 
+                  min="0"
+                  max="50"
+                  required 
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label-clean">Education</label>
+                <input 
+                  type="text" 
+                  name="education" 
+                  value={formData.education} 
+                  onChange={handleChange} 
+                  className="form-input-clean" 
+                  placeholder="e.g. BS Computer Science" 
+                  required 
+                />
+              </div>
             </div>
           </div>
 
-          {error && <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: '14px', background: '#fee2e2', padding: '12px', borderRadius: '8px' }}>{error}</div>}
+          <div className="form-divider" />
+
+          {/* Completed Missions Section */}
+          <div className="form-section">
+            <div className="section-header-row">
+              <div>
+                <h2 className="section-title-sm">Completed Missions</h2>
+                <p className="section-desc">Select the missions the candidate successfully passed.</p>
+              </div>
+              <div className="quick-actions">
+                <button type="button" onClick={selectAllMissions} className="btn-link">All (31)</button>
+                <button type="button" onClick={selectFoundationMissions} className="btn-link">Days 1–10</button>
+              </div>
+            </div>
+            
+            <div className="missions-scroll-list">
+              {curriculumData.days.map(d => {
+                const isChecked = selectedDayIds.includes(d.day);
+                return (
+                  <label key={d.day} className={`mission-item-card ${isChecked ? 'selected' : ''}`}>
+                    <input 
+                      type="checkbox" 
+                      checked={isChecked} 
+                      onChange={() => handleDayToggle(d.day)} 
+                      className="mission-checkbox"
+                    />
+                    <span className="mission-day-badge">Day {d.day}</span>
+                    <span className="mission-title-text">{d.title}</span>
+                  </label>
+                );
+              })}
+            </div>
+            <div className="mission-count-badge">
+              {selectedDayIds.length} of {curriculumData.days.length} missions selected
+            </div>
+          </div>
+
+          {error && (
+            <div className="form-error-banner">
+              {error}
+            </div>
+          )}
           
-          <button type="submit" className="btn btn-primary btn-submit">
+          <button type="submit" className="btn btn-primary btn-submit-hero">
             Start interview <ArrowRightIcon />
           </button>
         </form>
