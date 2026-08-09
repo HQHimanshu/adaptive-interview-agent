@@ -10,25 +10,52 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 80px 20px;
+  padding: 100px 20px 80px;
   min-height: calc(100vh - 72px);
+  position: relative;
+  background-image: 
+    linear-gradient(180deg, rgba(0, 0, 0, 0.50) 0%, rgba(0, 0, 0, 0.35) 80%, rgba(255, 255, 255, 0.40) 95%, #ffffff 100%),
+    url('/hero-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.hero-card {
+  max-width: 900px;
+  padding: 44px 52px;
+  border-radius: 28px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 8px 18px;
   border-radius: 99px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-bottom: 32px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 28px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .badge-icon {
-  color: var(--primary);
+  color: #c084fc;
 }
 
 .hero-title {
@@ -37,10 +64,12 @@
   line-height: 1.1;
   letter-spacing: -1.5px;
   margin-bottom: 24px;
+  color: #ffffff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #5c3ce6 0%, #8752f3 100%);
+  background: linear-gradient(135deg, #c084fc 0%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -48,9 +77,11 @@
 
 .hero-subtitle {
   font-size: 18px;
-  color: var(--text-muted);
+  color: #f1f5f9;
+  font-weight: 500;
   line-height: 1.6;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
 }
 
 .hero-actions {
@@ -59,26 +90,58 @@
   margin-bottom: 64px;
 }
 
+.hero-actions .btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #ffffff;
+  border: none;
+}
+
+.hero-actions .btn-primary:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+.hero-actions .btn-outline {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hero-actions .btn-outline:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #ffffff;
+}
+
 .btn-lg {
   height: 48px;
   padding: 0 24px;
   font-size: 15px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .features-list {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 32px;
-  color: var(--text-faint);
+  gap: 16px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  margin-top: 48px;
 }
 
 .features-list span {
   display: flex;
   align-items: center;
   gap: 8px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 99px;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 /* Common Section Styles */
