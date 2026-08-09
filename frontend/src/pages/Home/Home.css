@@ -10,8 +10,8 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 100px 20px 80px;
-  min-height: calc(100vh - 72px);
+  padding: 140px 20px 80px;
+  min-height: 100vh;
   position: relative;
   background-image: 
     linear-gradient(180deg, rgba(0, 0, 0, 0.50) 0%, rgba(0, 0, 0, 0.35) 80%, rgba(255, 255, 255, 0.40) 95%, #ffffff 100%),
