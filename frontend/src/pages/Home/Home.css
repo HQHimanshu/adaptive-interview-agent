@@ -111,7 +111,7 @@
 /* Feature Grid */
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
 }
 
@@ -151,7 +151,7 @@
 /* Steps Grid */
 .steps-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
 }
 
@@ -218,9 +218,6 @@
 
 /* Responsive Media Queries */
 @media (max-width: 992px) {
-  .feature-grid, .steps-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (max-width: 768px) {
@@ -253,10 +250,6 @@
   
   .why-section, .how-section, .cta-section {
     padding: 40px 20px;
-  }
-  
-  .feature-grid, .steps-grid {
-    grid-template-columns: 1fr;
   }
   
   .cta-banner {

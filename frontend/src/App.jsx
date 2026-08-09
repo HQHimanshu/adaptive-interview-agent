@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Home from './pages/Home/Home';
@@ -12,6 +12,23 @@ import './index.css';
 import { InterviewProvider } from './context/InterviewContext';
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showSplash) {
+    return (
+      <div className="splash-screen">
+        <img src="/logo.png" alt="AB Talks Logo" className="splash-logo" />
+      </div>
+    );
+  }
+
   return (
     <InterviewProvider>
       <Routes>

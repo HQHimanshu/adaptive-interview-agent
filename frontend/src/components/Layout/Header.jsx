@@ -7,7 +7,7 @@ const SparklesIcon = () => (
 );
 
 const Logo = () => (
-  <img src="/logo.png" alt="AB Talks Logo" style={{ height: '32px' }} />
+  <img src="/logo.png" alt="AB Talks Logo" style={{ height: '48px', mixBlendMode: 'multiply' }} />
 );
 
 const Header = () => {

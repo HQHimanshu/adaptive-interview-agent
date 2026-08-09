@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './ModuleDetails.css';
 
 import curriculumData from '../../data/curriculum.json';
@@ -19,6 +19,19 @@ const TargetIcon = () => (
 const ArrowRightIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
 );
+
+const getTypeColor = (type) => {
+  switch(type) {
+    case 'SETUP': return { bg: '#e0f2fe', text: '#0284c7' };
+    case 'BUILD': return { bg: '#dcfce7', text: '#16a34a' };
+    case 'AI_CORE': return { bg: '#f3e8ff', text: '#9333ea' };
+    case 'SHIP_IT': return { bg: '#fee2e2', text: '#dc2626' };
+    case 'LEARN': return { bg: '#fef9c3', text: '#ca8a04' };
+    case 'OPTIMIZE': return { bg: '#ffedd5', text: '#ea580c' };
+    case 'CAPSTONE': return { bg: '#e0e7ff', text: '#4f46e5' };
+    default: return { bg: '#f4f4f5', text: '#52525b' };
+  }
+};
 
 const ModuleDetails = ({ id }) => {
   const currentModId = id || '1';
@@ -51,7 +64,9 @@ const ModuleDetails = ({ id }) => {
                 <span className="day-badge-num">{day.day}</span>
               </div>
               <h3 className="day-title">{day.title}</h3>
-              <button className="btn btn-setup">{day.type || 'SETUP'}</button>
+              <div className="day-type-badge" style={{ background: getTypeColor(day.type).bg, color: getTypeColor(day.type).text }}>
+                {(day.type || 'SETUP').replace('_', ' ')}
+              </div>
             </div>
             
             <div className="day-card-content">
@@ -70,6 +85,11 @@ const ModuleDetails = ({ id }) => {
                     <li key={i}>{obj}</li>
                   ))}
                 </ul>
+              </div>
+              
+              <div className="day-actions" style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+                <button className="btn" style={{ background: 'var(--text)', color: 'var(--bg)', padding: '12px 24px', borderRadius: '8px', fontWeight: '600' }}>Start Learning</button>
+                <button className="btn" style={{ border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', padding: '12px 24px', borderRadius: '8px', fontWeight: '600' }}>Mark as Complete</button>
               </div>
             </div>
           </div>

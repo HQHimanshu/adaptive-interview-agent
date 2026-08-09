@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getSessions } from '../../lib/storage';
 import './Dashboard.css';
 
 const SparklesIcon = () => (
@@ -9,12 +10,27 @@ const StarIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
 );
 
-const sessions = [
-  { id: 'ABT-QBKGF7', name: 'Adityakumar Pandey', role: 'AI Engineer', level: 'Mid', score: 35 },
-  { id: 'ABT-KKKGKM', name: 'Adityakumar Pandey', role: 'AI Engineer', level: 'Mid', score: 5 }
-];
+const CheckIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+);
+
+const AlertIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+);
 
 const Dashboard = () => {
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
+
+  useEffect(() => {
+    setSessions(getSessions());
+  }, []);
+
+  const completedSessions = sessions.filter(s => s.status === 'completed');
+  const avgScore = completedSessions.length > 0 
+    ? Math.round(completedSessions.reduce((acc, s) => acc + (s.feedback?.score || 0), 0) / completedSessions.length)
+    : 0;
+
   return (
     <div className="dashboard-container">
       <div className="badge program-badge">
@@ -30,36 +46,76 @@ const Dashboard = () => {
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-label">TOTAL SESSIONS</div>
-          <div className="stat-value">2</div>
+          <div className="stat-value">{sessions.length}</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">COMPLETED</div>
-          <div className="stat-value">2</div>
+          <div className="stat-value">{completedSessions.length}</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">AVG. SCORE</div>
-          <div className="stat-value">20</div>
+          <div className="stat-value">{avgScore}</div>
         </div>
       </div>
       
       <div className="dashboard-layout">
         <div className="sessions-list">
-          {sessions.map(session => (
-            <div key={session.id} className="session-card">
-              <div className="session-card-header">
-                <span className="session-tag"># {session.id}</span>
-                <div className="score-badge">
-                  <StarIcon /> {session.score}
+          {sessions.length === 0 ? (
+            <div style={{color: 'var(--text-muted)'}}>No sessions found. Start a new interview to see it here.</div>
+          ) : (
+            sessions.map(session => (
+              <div key={session.id} className={`session-card ${selectedSession?.id === session.id ? 'active' : ''}`} onClick={() => setSelectedSession(session)} style={{ cursor: 'pointer', border: selectedSession?.id === session.id ? '1px solid var(--text)' : '1px solid var(--border)' }}>
+                <div className="session-card-header">
+                  <span className="session-tag"># {session.id}</span>
+                  {session.status === 'completed' ? (
+                    <div className="score-badge">
+                      <StarIcon /> {session.feedback?.score}
+                    </div>
+                  ) : (
+                    <div className="score-badge" style={{background: '#fef3c7', color: '#b45309'}}>
+                      In Progress
+                    </div>
+                  )}
                 </div>
+                <h3 className="session-name">{session.candidate?.name}</h3>
+                <p className="session-role">{session.candidate?.role} &middot; {session.candidate?.experience}</p>
               </div>
-              <h3 className="session-name">{session.name}</h3>
-              <p className="session-role">{session.role} &middot; {session.level}</p>
-            </div>
-          ))}
+            ))
+          )}
         </div>
         
-        <div className="feedback-preview-pane">
-          Select a session to view its feedback.
+        <div className="feedback-preview-pane" style={selectedSession ? {display: 'block', border: 'none', background: 'transparent'} : {}}>
+          {!selectedSession ? (
+            "Select a session to view its feedback."
+          ) : selectedSession.status !== 'completed' ? (
+            <div style={{color: 'var(--text-muted)'}}>This interview is still in progress. Complete all 8 questions to receive feedback.</div>
+          ) : (
+            <div style={{background: 'white', border: '1px solid var(--border)', borderRadius: '12px', padding: '32px'}}>
+              <h2 style={{fontSize: '20px', fontWeight: 700, marginBottom: '24px'}}>{selectedSession.candidate?.name}'s Evaluation</h2>
+              <div style={{marginBottom: '24px'}}>
+                <h3 style={{fontSize: '12px', fontWeight: 700, letterSpacing: '1px', color: 'var(--primary)', marginBottom: '8px'}}>SUMMARY</h3>
+                <p style={{fontSize: '14px', lineHeight: 1.6, color: 'var(--text)'}}>{selectedSession.feedback?.summary}</p>
+              </div>
+              <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
+                <div style={{flex: 1, minWidth: '250px'}}>
+                  <h3 style={{fontSize: '12px', fontWeight: 700, letterSpacing: '1px', color: '#10b981', marginBottom: '12px'}}>STRENGTHS</h3>
+                  <ul style={{listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', padding: 0}}>
+                    {selectedSession.feedback?.strengths?.map((s, i) => (
+                      <li key={i} style={{display: 'flex', gap: '8px', fontSize: '14px'}}><CheckIcon /> <span style={{flex: 1}}>{s}</span></li>
+                    ))}
+                  </ul>
+                </div>
+                <div style={{flex: 1, minWidth: '250px'}}>
+                  <h3 style={{fontSize: '12px', fontWeight: 700, letterSpacing: '1px', color: '#ef4444', marginBottom: '12px'}}>GAPS</h3>
+                  <ul style={{listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', padding: 0}}>
+                    {selectedSession.feedback?.gaps?.map((g, i) => (
+                      <li key={i} style={{display: 'flex', gap: '8px', fontSize: '14px'}}><AlertIcon /> <span style={{flex: 1}}>{g}</span></li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

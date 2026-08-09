@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createSession } from '../../lib/storage';
+import curriculumData from '../../data/curriculum.json';
 import './CandidateForm.css';
 
 const UserIcon = () => (
@@ -30,10 +32,38 @@ const levels = ['Entry', 'Junior', 'Mid', 'Senior', 'Lead'];
 
 const CandidateForm = () => {
   const navigate = useNavigate();
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    role: 'AI Engineer',
+    experience: 'Mid',
+    focusArea: curriculumData.modules[0].title
+  });
+  
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleLevelSelect = (level) => {
+    setFormData(prev => ({ ...prev, experience: level }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/interview/session');
+    if (!formData.name.trim() || !formData.email.trim()) {
+      setError('Please fill out your name and email.');
+      return;
+    }
+    
+    // Create session in mock DB
+    const session = createSession(formData);
+    
+    // Navigate to interview session with ID
+    navigate(`/interview/session?id=${session.id}`);
   };
 
   return (
@@ -49,24 +79,24 @@ const CandidateForm = () => {
         <form onSubmit={handleSubmit} className="candidate-form">
           <div className="form-group">
             <label className="form-label"><UserIcon /> FULL NAME</label>
-            <input type="text" className="form-input" placeholder=" " />
+            <input type="text" name="name" value={formData.name} onChange={handleChange} className="form-input" placeholder=" " required />
           </div>
           
           <div className="form-group">
             <label className="form-label"><MailIcon /> EMAIL</label>
-            <input type="email" className="form-input" placeholder="you@email.com" />
+            <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-input" placeholder="you@email.com" required />
           </div>
           
           <div className="form-group">
             <label className="form-label"><BriefcaseIcon /> TARGET ROLE</label>
-            <input type="text" className="form-input" defaultValue="AI Engineer" />
+            <input type="text" name="role" value={formData.role} onChange={handleChange} className="form-input" />
           </div>
           
           <div className="form-group">
             <label className="form-label"><ClockIcon /> EXPERIENCE LEVEL</label>
             <div className="level-selector">
               {levels.map(level => (
-                <button type="button" key={level} className={`level-btn ${level === 'Mid' ? 'active' : ''}`}>
+                <button type="button" key={level} onClick={() => handleLevelSelect(level)} className={`level-btn ${level === formData.experience ? 'active' : ''}`}>
                   {level}
                 </button>
               ))}
@@ -75,11 +105,14 @@ const CandidateForm = () => {
           
           <div className="form-group">
             <label className="form-label"><TargetIcon /> FOCUS AREA</label>
-            <select className="form-input select-input">
-              <option>Module 1: Environment & Tooling</option>
-              <option>Module 2: Data Foundations</option>
+            <select name="focusArea" value={formData.focusArea} onChange={handleChange} className="form-input select-input">
+              {curriculumData.modules.map(mod => (
+                <option key={mod.n} value={mod.title}>Module {mod.n}: {mod.title}</option>
+              ))}
             </select>
           </div>
+
+          {error && <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: '14px', background: '#fee2e2', padding: '12px', borderRadius: '8px' }}>{error}</div>}
           
           <button type="submit" className="btn btn-primary btn-submit">
             Start interview <ArrowRightIcon />

@@ -2,7 +2,7 @@ import React from 'react';
 import './Footer.css';
 
 const Logo = () => (
-  <img src="/logo.png" alt="AB Talks Logo" style={{ height: '32px' }} />
+  <img src="/logo.png" alt="AB Talks Logo" style={{ height: '24px' }} />
 );
 
 const Footer = () => {

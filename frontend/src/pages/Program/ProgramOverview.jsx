@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import ModuleDetails from './ModuleDetails';
 import './ProgramOverview.css';
 
@@ -14,12 +14,12 @@ const LayersIcon = () => (
 );
 
 const ProgramOverview = () => {
-  const { id } = useParams();
+  const [activeModule, setActiveModule] = useState('1');
   
   return (
     <div className="program-container">
       <div className="badge program-badge">
-        <SparklesIcon /> AI Cohort &middot; 31 days &middot; 8 modules
+        <SparklesIcon /> {curriculumData.cohort}
       </div>
       
       <h1 className="program-title">The 31-day program</h1>
@@ -35,7 +35,7 @@ const ProgramOverview = () => {
           const duration = `Days ${mod.days[0]}-${mod.days[1]} \u00b7 ${numDays} days`;
           
           return (
-            <Link to={`/program/${modId}`} key={modId} className={`module-card ${modId === (id || '1') ? 'active' : ''}`}>
+            <div key={modId} className={`module-card ${modId === activeModule ? 'active' : ''}`} onClick={() => setActiveModule(modId)} style={{ cursor: 'pointer' }}>
               <div className="module-card-header">
                 <span className="module-num">{modId.padStart(2, '0')}</span>
                 <span className="module-icon"><LayersIcon /></span>
@@ -44,13 +44,13 @@ const ProgramOverview = () => {
                 <h3 className="module-card-title">{mod.title}</h3>
                 <p className="module-card-duration">{duration}</p>
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>
       
-      {/* Show ModuleDetails only if an id is present or default to 1 */}
-      <ModuleDetails id={id || '1'} />
+      {/* Show ModuleDetails based on local state */}
+      <ModuleDetails id={activeModule} />
     </div>
   );
 };

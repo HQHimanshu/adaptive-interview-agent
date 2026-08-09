@@ -109,7 +109,7 @@
 }
 
 .modal-body {
-  padding: 40px;
+  padding: 40px 40px 0 40px;
   overflow-y: auto;
   flex: 1;
 }
@@ -136,6 +136,16 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
+}
+
+.next-steps-section {
+  margin-top: 24px;
+  margin-bottom: 40px;
+  padding: 16px;
+  background: var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
 .analysis-header {
@@ -194,7 +204,11 @@
   }
   
   .modal-body {
-    padding: 24px;
+    padding: 24px 24px 0 24px;
+  }
+  
+  .next-steps-section {
+    margin-bottom: 24px;
   }
   
   .analysis-grid {

@@ -22,24 +22,34 @@ const RotateIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
 );
 
-const EvaluationModal = () => {
+const CloseIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+);
+
+const EvaluationModal = ({ session, onClose }) => {
+  if (!session || !session.feedback) return null;
+
+  const { candidate, id, feedback } = session;
+  const { summary, strengths, gaps, score, recommendation } = feedback;
+
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="modal-content" style={{ position: 'relative' }}>
+        <button onClick={onClose} style={{ position: 'absolute', top: '24px', right: '24px', background: 'transparent', border: 'none', color: 'var(--text-faint)', cursor: 'pointer' }}><CloseIcon /></button>
         <div className="modal-header">
           <div className="modal-badge">
             <SparklesIcon /> Interview complete
           </div>
-          <h2 className="modal-title">Adityakumar Pandey, here's your evaluation</h2>
-          <div className="modal-session">Session ABT-QBKGF7</div>
+          <h2 className="modal-title">{candidate?.name}, here's your evaluation</h2>
+          <div className="modal-session">Session {id}</div>
           
           <div className="score-section">
             <div className="score-circle">
-              <span className="score-value">35</span>
+              <span className="score-value">{score}</span>
             </div>
             <div className="recommendation-area">
               <div className="recommendation-label">RECOMMENDATION</div>
-              <div className="recommendation-text"><StarIcon /> Needs More Preparation</div>
+              <div className="recommendation-text"><StarIcon /> {recommendation}</div>
             </div>
           </div>
         </div>
@@ -47,33 +57,31 @@ const EvaluationModal = () => {
         <div className="modal-body">
           <div className="summary-section">
             <div className="section-header"><SparklesIcon /> SUMMARY</div>
-            <p className="summary-text">
-              Adityakumar Pandey provided extremely brief, shorthand responses that lacked the depth
-              and technical articulation required for a mid-level AI Engineer role. While the candidate
-              acknowledged the topics, the failure to provide detailed explanations for critical concepts
-              like dependency management, RAG optimization, and agentic workflows indicates a need
-              for significant technical foundational review.
-            </p>
+            <p className="summary-text">{summary}</p>
           </div>
           
           <div className="analysis-grid">
             <div className="analysis-column">
               <div className="analysis-header text-green">STRENGTHS</div>
               <ul className="analysis-list">
-                <li><CheckIcon /> <span>Ability to acknowledge and engage with a wide variety of advanced AI engineering topics</span></li>
-                <li><CheckIcon /> <span>Familiarity with the terminology across the entire ML lifecycle from environment setup to production monitoring</span></li>
-                <li><CheckIcon /> <span>Efficient communication style, though currently lacking in depth for a technical interview context</span></li>
+                {strengths?.map((item, i) => (
+                  <li key={i}><CheckIcon /> <span>{item}</span></li>
+                ))}
               </ul>
             </div>
             
             <div className="analysis-column">
               <div className="analysis-header text-red">GAPS</div>
               <ul className="analysis-list">
-                <li><AlertIcon /> <span>Lack of technical elaboration on environment management and the specific benefits of containerization over virtual environments</span></li>
-                <li><AlertIcon /> <span>Insufficient depth regarding data preprocessing techniques for noisy or missing data</span></li>
-                <li><AlertIcon /> <span>Inability to articulate the architectural trade-offs between fine-tuning and prompting strategies</span></li>
+                {gaps?.map((item, i) => (
+                  <li key={i}><AlertIcon /> <span>{item}</span></li>
+                ))}
               </ul>
             </div>
+          </div>
+          
+          <div className="next-steps-section">
+            <strong>What's next?</strong> View the full 31-day program to dive deeper into these topics, or start a new interview to practice other modules.
           </div>
         </div>
         
@@ -81,7 +89,7 @@ const EvaluationModal = () => {
           <Link to="/program" className="btn btn-outline btn-wide">
             <SparklesIcon /> View program
           </Link>
-          <Link to="/interview" className="btn btn-primary btn-wide">
+          <Link to="/interview" className="btn btn-primary btn-wide" onClick={onClose}>
             <RotateIcon /> New interview
           </Link>
         </div>

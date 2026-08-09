@@ -14,6 +14,17 @@
   --radius-lg: 20px;
 }
 
+[data-theme='dark'] {
+  --bg: #09090b;
+  --text: #ffffff;
+  --text-muted: #a1a1aa;
+  --text-faint: #52525b;
+  --border: #27272a;
+  --border-hover: #3f3f46;
+  --primary: #8752f3;
+  --primary-hover: #a78bfa;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -53,15 +64,26 @@ input, select {
 
 .header {
   height: 72px;
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 40px;
-  background: white;
+  padding: 0 32px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   position: sticky;
-  top: 0;
+  top: 24px;
+  margin: 0 auto 32px auto;
+  max-width: 1200px;
+  width: calc(100% - 48px);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
   z-index: 100;
+}
+
+[data-theme='dark'] .header {
+  background: rgba(9, 9, 11, 0.75);
 }
 
 .header-logo {
@@ -81,7 +103,9 @@ input, select {
   font-size: 14px;
   color: var(--text-muted);
   font-weight: 500;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
 }
 
 .header-nav a:hover, .header-nav a.active {
@@ -89,9 +113,8 @@ input, select {
 }
 
 .header-nav a.active {
-  border-bottom: 2px solid var(--text);
-  padding-bottom: 24px;
-  margin-bottom: -26px;
+  background: var(--text);
+  color: white;
 }
 
 .btn {
@@ -137,4 +160,31 @@ input, select {
 
 main {
   flex: 1;
+}
+.splash-screen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+[data-theme='dark'] .splash-screen {
+  background: var(--bg);
+}
+.splash-logo {
+  height: 240px;
+  animation: zoomIn 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  mix-blend-mode: multiply;
+}
+[data-theme='dark'] .splash-logo {
+  filter: invert(1);
+}
+[data-theme='dark'] .footer-logo img {
+  filter: invert(1);
+}
+@keyframes zoomIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
