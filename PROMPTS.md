@@ -1858,3 +1858,939 @@ In flash screen increase the size of  logo.
 
 Make the sidely curve and make it professionnal header and give the space between the from above and side also.
 
+# Sprints 8.4 - Changes in Frontend
+
+FRONTEND DEVELOPMENT LOG
+========================
+
+Feature: Home Page / Hero Section
+
+P01 - Homepage Background
+Date:
+Prompt:
+Use the provided image as the homepage background.
+
+P02 - Background Visibility
+Date:
+Prompt:
+Increase background image visibility and reduce excessive opacity.
+
+P03 - Hero Typography
+Date:
+Prompt:
+Change hero text to white for better visibility.
+
+P04 - Hero Spacing
+Date:
+Prompt:
+Increase spacing between Interview/Explore Program CTAs
+and the feature section.
+
+P05 - Bottom Gradient
+Date:
+Prompt:
+Reduce the white shade at the bottom of the background.
+
+P06 - Fixed Background
+Date:
+Prompt:
+Keep the background image fixed while scrolling.
+
+P07 - Bottom Gradient Refinement
+Date:
+Prompt:
+Further reduce the white bottom shade while maintaining
+a smooth transition.
+
+P08 - Header Layout
+Date:
+Prompt:
+Remove the old white header section because the header
+is now inside a box. Keep the background image visible
+and maintain justified spacing between the header and
+AI Cohort section.
+
+# Sprint 9.1 - Integration 
+
+You are working on the frontend integration of my Hackathon project: "Adaptive Interview Agent".
+
+IMPORTANT:
+The backend is ALREADY COMPLETE and FROZEN.
+The frontend UI is ALSO ALREADY COMPLETE and should NOT be redesigned or unnecessarily rewritten.
+
+Your task is to INTEGRATE the existing React frontend with the existing Express backend while preserving the current UI/UX.
+
+DO NOT redesign the frontend.
+DO NOT rewrite the backend.
+DO NOT change the backend API contract unless absolutely required to fix a genuine contract mismatch.
+DO NOT introduce authentication.
+DO NOT add unnecessary libraries.
+DO NOT replace the existing visual design.
+
+==================================================
+PROJECT ARCHITECTURE
+==================================================
+
+Frontend:
+- React
+- Vite
+- React Router
+- Existing polished UI
+- Frontend runs on localhost:5173
+
+Backend:
+- Node.js
+- Express
+- Groq SDK / LLM
+- Breeth MCP
+- Backend runs on localhost:3000
+- Backend endpoint:
+
+POST /api/interview
+
+The Vite proxy is already configured:
+
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:3000',
+      changeOrigin: true
+    }
+  }
+}
+
+Therefore frontend requests should continue using:
+
+fetch('/api/interview', ...)
+
+Do NOT replace this with a hardcoded localhost:3000 URL.
+
+==================================================
+AUTHORITATIVE HACKATHON API CONTRACT
+==================================================
+
+The technical specification requires exactly one interview endpoint:
+
+POST /api/interview
+
+No authentication is required.
+
+The supplied sessionId maintains interview state.
+
+START REQUEST:
+
+POST /api/interview
+
+{
+  "sessionId": "abc-123",
+  "candidate": { ...candidate data... }
+}
+
+Expected response:
+
+{
+  "reply": "Welcome. Let's begin your interview.",
+  "done": false
+}
+
+SUBSEQUENT TURN:
+
+POST /api/interview
+
+{
+  "sessionId": "abc-123",
+  "message": "candidate answer"
+}
+
+Expected response:
+
+{
+  "reply": "next question...",
+  "done": false
+}
+
+FINAL RESPONSE:
+
+{
+  "reply": "Interview completed.",
+  "done": true,
+  "feedback": {
+    "summary": "...",
+    "strengths": [],
+    "gaps": [],
+    "next": []
+  }
+}
+
+The feedback fields are exactly:
+
+summary: string
+strengths: string[]
+gaps: string[]
+next: string[]
+
+The frontend must trust the backend's `done` field to determine completion.
+
+Do NOT determine interview completion purely from frontend question counting.
+
+==================================================
+CURRENT FRONTEND API SERVICE
+==================================================
+
+There is already:
+
+src/services/api.js
+
+It currently contains:
+
+api.startInterview(sessionId, candidate)
+
+which sends:
+
+POST /api/interview
+
+{
+  sessionId,
+  candidate
+}
+
+and:
+
+api.sendInterviewMessage(sessionId, message)
+
+which sends:
+
+POST /api/interview
+
+{
+  sessionId,
+  message
+}
+
+THIS API SERVICE IS ALREADY CORRECT.
+
+Reuse it.
+
+Do not duplicate fetch() calls throughout React components.
+
+==================================================
+CRITICAL CURRENT PROBLEM
+==================================================
+
+The current frontend interview page is STILL MOCKED.
+
+File:
+
+src/pages/Interview/InterviewSession.jsx
+
+Currently it:
+- imports getSession/updateSession from ../../lib/storage
+- contains MOCK_QUESTIONS
+- generates questions locally
+- uses setTimeout() to simulate AI thinking
+- generates fake feedback using generateFeedback()
+- updates local mock session storage
+- calculates question count from frontend messages
+
+THIS MUST BE REPLACED WITH REAL BACKEND COMMUNICATION.
+
+The existing UI/CSS/layout should remain intact.
+
+Only replace the underlying interview logic.
+
+==================================================
+REAL INTERVIEW FLOW
+==================================================
+
+The final behavior must be:
+
+Candidate Form
+    ↓
+Create/generate sessionId
+    ↓
+Navigate to InterviewSession
+    ↓
+InterviewSession calls:
+
+api.startInterview(sessionId, candidate)
+
+    ↓
+POST /api/interview
+    ↓
+Backend returns Q1
+    ↓
+Display backend reply in existing chat UI
+
+Then:
+
+Candidate enters answer
+    ↓
+api.sendInterviewMessage(sessionId, answer)
+    ↓
+POST /api/interview
+    ↓
+Backend returns next question
+    ↓
+Display next question
+
+Repeat until backend returns:
+
+done: true
+
+Then:
+
+Display evaluation/feedback using:
+
+feedback.summary
+feedback.strengths
+feedback.gaps
+feedback.next
+
+DO NOT generate feedback on the frontend.
+
+DO NOT use generateFeedback().
+
+DO NOT use MOCK_QUESTIONS.
+
+DO NOT use artificial setTimeout() to simulate the backend.
+
+==================================================
+Q8 REQUIREMENT
+==================================================
+
+This is extremely important.
+
+There are 8 minimum questions.
+
+The correct sequence is:
+
+Q1
+↓
+Answer 1
+↓
+Q2
+↓
+Answer 2
+↓
+...
+↓
+Q7
+↓
+Answer 7
+↓
+Q8
+↓
+Answer 8
+↓
+FINAL EVALUATION
+
+Q8 itself is a real interview question.
+
+The frontend must NOT show feedback immediately when Q8 appears.
+
+The candidate MUST be allowed to answer Q8.
+
+Only after sending the Q8 answer to:
+
+POST /api/interview
+
+and receiving:
+
+{
+  "done": true,
+  "feedback": {...}
+}
+
+should the frontend show the feedback.
+
+The backend is the source of truth.
+
+==================================================
+QUESTION PROGRESS
+==================================================
+
+Do not calculate question progress using:
+
+Math.floor(messages.length / 2)
+
+Do not infer backend progress from chat message count.
+
+The frontend should maintain a UI progress state based on actual interview turns/backend responses.
+
+At minimum the UI should correctly show:
+
+QUESTION 1/8
+QUESTION 2/8
+...
+QUESTION 8/8
+
+When Q8 is displayed, it must still allow an answer.
+
+After the final answer, show evaluation state.
+
+If the backend already returns progress/currentQuestion/totalQuestions, use those values.
+
+If it does not, maintain only the minimal frontend display state necessary to represent the current question without interfering with backend state.
+
+==================================================
+LOADING STATES
+==================================================
+
+Use real request states.
+
+After submitting an answer:
+
+Show the existing typing/loading UI, but it must correspond to the actual API request.
+
+Example:
+
+AI is thinking...
+
+Disable:
+- input
+- submit button
+
+while the request is pending.
+
+After Q8 answer:
+
+Show:
+
+Evaluating your interview...
+
+until the final response containing feedback arrives.
+
+Do not use fake fixed delays.
+
+==================================================
+ERROR HANDLING
+==================================================
+
+Handle:
+- network failure
+- HTTP 400
+- HTTP 404
+- HTTP 500
+- malformed response
+- completed session
+- duplicate submission
+
+Never send duplicate requests if the user clicks submit multiple times.
+
+The submit button must be disabled while a request is in progress.
+
+If an API request fails, preserve the candidate's typed answer when possible and show a useful retry state.
+
+==================================================
+CANDIDATE DATA REQUIREMENT
+==================================================
+
+This is VERY IMPORTANT.
+
+The current CandidateForm contains frontend fields:
+
+- name
+- email
+- role
+- experience
+- focusAreas
+
+Current implementation creates:
+
+createSession(formData)
+
+and stores the frontend form object.
+
+This is NOT sufficient as the final backend candidate payload unless those fields exactly match the backend's candidate schema.
+
+The supplied candidate dataset is:
+
+candidates.json
+
+Its candidate records contain:
+
+member:
+  id
+  name
+  jobRole
+  yearsExperience
+  education
+  status
+
+missions:
+  day
+  title
+  passed
+  skipped
+  attempts
+
+signals:
+  commitDays
+  missionsCompleted
+  missionsFirstTry
+
+Example candidate structure:
+
+{
+  "member": {
+    "id": "CAND-001",
+    "name": "Sarah Johnson",
+    "jobRole": "Senior Data Engineer",
+    "yearsExperience": 9,
+    "education": "MS Computer Science",
+    "status": "COMPLETED"
+  },
+  "missions": [...],
+  "signals": {
+    "commitDays": 28,
+    "missionsCompleted": 30,
+    "missionsFirstTry": 20
+  }
+}
+
+IMPORTANT:
+Do NOT invent candidate fields.
+Do NOT fabricate education.
+Do NOT fabricate mission history.
+Do NOT fabricate signals.
+Do NOT send arbitrary UI-only fields to the backend merely because they exist in the form.
+
+The candidate object sent to the backend must conform to the ACTUAL candidate schema expected by the backend and the supplied candidate.json specification.
+
+Before changing the CandidateForm, inspect the backend code and determine exactly which candidate object shape the backend consumes.
+
+The technical specification explicitly states that:
+
+"The candidate object will follow the provided candidate.json schema."
+
+Therefore the backend's expected candidate object and the supplied candidate JSON are authoritative.
+
+==================================================
+CANDIDATE FORM / JSON MAPPING
+==================================================
+
+The existing UI currently collects:
+
+name
+email
+target role
+experience level
+focus areas
+
+We need to distinguish between:
+
+1. UI-only fields
+2. Candidate-schema fields
+3. Data required by the backend
+
+Do NOT blindly send all formData.
+
+Create a clear mapping layer.
+
+For example, conceptually:
+
+const candidatePayload = {
+   // ONLY fields actually required by candidate schema
+};
+
+The exact fields must be determined by inspecting:
+- backend candidate handling
+- supplied candidates.json
+- technical-spec.md
+
+If a required candidate-schema field is not currently collected by the form, decide the MINIMAL correct UI change needed to collect it.
+
+Do not silently substitute fake values.
+
+If a field is not required by the actual backend candidate schema, do not send it.
+
+==================================================
+EMAIL / FOCUS AREAS / EXPERIENCE
+==================================================
+
+The current form collects email, experience level and focusAreas.
+
+These fields must NOT automatically be added to candidatePayload just because the UI collects them.
+
+Determine whether they belong in the backend candidate schema.
+
+If they are not part of the required candidate JSON:
+- they may remain frontend metadata if useful for UI
+- but they must not pollute the backend candidate object
+
+If a form field maps to an existing candidate field, map it explicitly.
+
+For example:
+
+role → jobRole
+
+experience → yearsExperience
+
+ONLY if that mapping is semantically correct and supported by the backend.
+
+Do not map arbitrary values such as:
+"Mid" → 5
+unless the application already defines an explicit mapping.
+
+If such a mapping is necessary, implement it transparently and document it.
+
+==================================================
+SESSION ID
+==================================================
+
+The backend requires the same sessionId throughout the entire interview.
+
+Generate/use exactly ONE sessionId when starting an interview.
+
+Example:
+
+CAND-TEST-008
+
+or the project's existing UUID/session generation mechanism.
+
+Do not generate a new sessionId for every answer.
+
+The same sessionId must be used for:
+
+startInterview(sessionId, candidate)
+
+and every:
+
+sendInterviewMessage(sessionId, message)
+
+==================================================
+LOCAL STORAGE
+==================================================
+
+The current frontend uses:
+
+src/lib/storage
+
+Do NOT delete it blindly.
+
+Inspect it.
+
+It may still be useful for:
+- candidate UI state
+- session ID
+- navigation
+- local UI persistence
+
+But the actual interview state must belong to the backend.
+
+Do NOT allow localStorage/mock storage to become the source of truth for:
+- questions
+- answers
+- adaptive state
+- evaluation
+- feedback
+
+Backend is the source of truth for those.
+
+==================================================
+FEEDBACK PAGE / MODAL
+==================================================
+
+The frontend already has:
+
+EvaluationModal
+FeedbackPage
+
+Reuse the existing design.
+
+Adapt them to consume the REAL backend feedback:
+
+feedback.summary
+feedback.strengths
+feedback.gaps
+feedback.next
+
+Do NOT display:
+- fake score 85
+- "Strong Candidate (Mock)"
+- "Technical depth is simulated"
+- "Needs real backend"
+
+These are mock values and must be removed from the real interview path.
+
+Do not invent a score if the backend does not return one.
+
+The hackathon feedback contract contains only:
+
+summary
+strengths
+gaps
+next
+
+Therefore the frontend must not manufacture a score.
+
+==================================================
+IMPORTANT EVALUATION RULE
+==================================================
+
+The evaluator must only evaluate what was actually tested.
+
+A curriculum topic that was never asked must NOT automatically become a gap.
+
+Do not implement frontend logic that creates gaps from curriculum coverage.
+
+The backend evaluator is responsible for evaluation.
+
+Frontend only renders:
+
+feedback.gaps
+
+==================================================
+CURRICULUM
+==================================================
+
+The supplied curriculum has 8 modules:
+
+1. Environment & Tooling
+2. Data Foundations
+3. Embeddings & Vector Search
+4. LLM Core, Prompting & Fine-Tuning
+5. Chatbot Application Build
+6. Agentic AI & MCP
+7. Evaluation, Security & Deployment
+8. Production & Capstone
+
+The existing focus-area UI may continue to display these modules.
+
+However, do not assume that selecting a focus area means the candidate demonstrated knowledge of it.
+
+The backend decides which questions are asked and what is evaluated.
+
+==================================================
+UI PRESERVATION
+==================================================
+
+The current frontend is already visually designed.
+
+Preserve:
+- navbar
+- typography
+- spacing
+- cards
+- buttons
+- chat bubbles
+- icons
+- responsive behavior
+- CSS
+- existing routing
+- existing page structure
+
+Do NOT replace the UI with a generic chat interface.
+
+Only modify data flow and state management required for backend integration.
+
+==================================================
+FILES TO INSPECT
+==================================================
+
+Inspect these files before making changes:
+
+Frontend:
+
+src/services/api.js
+src/pages/Interview/InterviewSession.jsx
+src/pages/FeedbackPage.jsx
+src/pages/SetupPage.jsx
+src/pages/LandingPage.jsx
+src/lib/storage.*
+src/components/Interview/*
+src/pages/*
+
+Backend:
+
+server.js
+routes
+controllers
+services
+session manager
+prompt builder
+Groq service
+Breeth service
+candidate data handling
+package.json
+
+Data:
+
+candidates.json
+curriculum.json
+
+Specification:
+
+technical-spec.md
+
+==================================================
+EXPECTED RESULT
+==================================================
+
+After your changes, this must work end-to-end:
+
+1. User opens frontend.
+2. User fills candidate details.
+3. Frontend creates one sessionId.
+4. Frontend creates the correctly shaped candidate JSON object.
+5. Frontend navigates to interview.
+6. InterviewSession calls api.startInterview().
+7. Backend returns Q1.
+8. Q1 appears in existing chat UI.
+9. Candidate submits answer.
+10. Frontend calls api.sendInterviewMessage().
+11. Backend returns Q2.
+12. Continue adaptively.
+13. Q8 appears.
+14. Candidate can answer Q8.
+15. Frontend sends Q8 answer.
+16. Backend returns done:true + feedback.
+17. Frontend displays "Evaluating..." while request is pending.
+18. Feedback UI displays the real:
+    - summary
+    - strengths
+    - gaps
+    - next
+19. No mock questions remain in the real interview flow.
+20. No fake feedback remains.
+21. No artificial setTimeout-based AI simulation remains.
+22. No frontend logic determines what technical gaps the candidate has.
+23. No duplicate requests occur.
+24. Backend remains unchanged unless a genuine integration bug is found.
+
+==================================================
+VALIDATION
+==================================================
+
+After implementation, run:
+
+npm run build
+
+and fix all frontend build/lint/runtime errors.
+
+Then test the complete flow manually:
+
+Start
+→ Q1
+→ Answer 1
+→ Q2
+→ Answer 2
+→ ...
+→ Q7
+→ Answer 7
+→ Q8
+→ Answer 8
+→ Evaluating
+→ Feedback
+
+Also verify in browser DevTools → Network:
+
+POST /api/interview
+
+First request payload:
+
+{
+  sessionId,
+  candidate
+}
+
+Subsequent request payload:
+
+{
+  sessionId,
+  message
+}
+
+Final response:
+
+{
+  done: true,
+  feedback: {
+    summary,
+    strengths,
+    gaps,
+    next
+  }
+}
+
+==================================================
+VERY IMPORTANT FINAL RULE
+==================================================
+
+Do not stop after making the UI appear connected.
+
+The integration is only complete if the actual Groq-powered backend is generating the questions and the actual backend evaluator is generating the final feedback.
+
+The frontend should become a thin presentation/client layer over the existing backend.
+
+Before finishing, provide:
+1. Files changed
+2. What was changed in each file
+3. Final candidate JSON shape being sent
+4. Exact API request flow
+5. Any assumptions made
+6. Any backend issues discovered
+7. Build/test result
+
+# Sprint 9.2 - further changes in integration
+
+Update the existing frontend interview page using the two attached reference images. Keep the current project theme, but make the interview interface look like a clean, premium professional technical interview environment — not overly flashy or exaggerated.
+
+Use the SECOND image as the main reference for the Module + Day structure. Show the candidate's current Module, Day and progress, including the existing candidate.json fields such as passed, skipped and attempts. Use the actual candidate.json schema already present in the project; do not invent fields or values.
+
+Fix the current HTTP 404 issue when entering the interview. After the candidate data is collected, navigate to the frontend /interview page and initialize the interview using:
+
+POST /api/interview
+
+{
+  "sessionId": "...",
+  "candidate": { ...candidate.json }
+}
+
+The backend response:
+
+{
+  "reply": "...",
+  "done": false
+}
+
+must appear directly as the AI interviewer's chat message.
+
+Whenever the candidate submits an answer, send:
+
+POST /api/interview
+
+{
+  "sessionId": "...",
+  "message": "candidate answer"
+}
+
+Use the SAME sessionId for the entire interview.
+
+Maintain the complete interview history so all previous questions and answers remain accessible. Add a compact question/history navigation so the candidate can click previous questions and review them.
+
+Improve the chat UI with clear separation between interviewer and candidate messages, a professional answer input area, loading state while the backend is responding, and proper error handling. Keep the design focused and premium without excessive animations, neon effects, or unnecessary UI.
+
+When the backend returns:
+
+{
+  "done": true,
+  "feedback": {
+    "summary": "...",
+    "strengths": [],
+    "gaps": [],
+    "next": []
+  }
+}
+
+treat the interview as completed. Disable further answers, preserve the complete transcript, and show the feedback report using exactly the returned summary, strengths, gaps and next fields.
+
+Important:
+- Do NOT modify the backend.
+- Do NOT change the API contract.
+- Do NOT hardcode interview questions.
+- Do NOT create mock API responses.
+- Inspect the existing frontend routing, API service, candidate.json and interview components before making changes.
+- Fix the actual cause of the 404.
+- Test the complete flow from candidate data → /interview → POST /api/interview → conversation → done:true → feedback.
+
