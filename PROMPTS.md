@@ -1718,3 +1718,143 @@ After completing the tests and cleanup:
 4. Do not commit.
 5. Do not push.
 6. Do not start Sprint 8.
+
+# Sprint 8 - Frontend - Initialization of Frontend and required components
+
+Build "AB Talks", an AI-Powered Adaptive Technical Interview System
+Build a fully functional, production-quality, responsive web app on Base44 (React + Tailwind + Vite, Base44 BaaS). This is a fully public app — wire NO auth routes; ignore the boilerplate Login/Register pages. Use only installed packages: React, Tailwind, shadcn/ui (@/components/ui/*), lucide-react, framer-motion, react-router-dom, date-fns, recharts, the pre-initialized base44 client (import { base44 } from '@/api/base44Client'). Do NOT install any new packages.
+
+1. Brand & Design System
+A monochrome brand (matching a pure black-on-white "AB Talks" monogram logo) with an electric indigo accent for all AI/interactive highlights.
+
+Logo: use this exact URL as the brand mark via a plain <img> (not the Image component): https://media.base44.com/images/public/user_698786b2c559df9f425137fb/f5edf2971_logo.png. Create src/components/Logo.jsx exporting default Logo({ className }) that renders <img src={LOGO_URL} alt="AB Talks" className={className} draggable={false} />. Use it in nav, footer, and splash.
+
+index.css tokens (exact values)
+Add @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap'); as the first line, before @tailwind base;.
+In :root, change font tokens to:
+--font-heading: 'Sora', ui-sans-serif, system-ui, sans-serif;
+--font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+--font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+Add brand tokens in :root: --brand: 245 80% 61%; and --brand-foreground: 0 0% 100%; (keep :root accent/primary as the default monochrome slate).
+Keep .dark as-is. Body uses font-body (already in base layer).
+tailwind.config.js
+Add to theme.extend.colors:
+brand: { DEFAULT: 'hsl(var(--brand))', foreground: 'hsl(var(--brand-foreground))' }
+fontFamily already maps heading/body/display to the var tokens — leave as-is.
+Design language
+Generous whitespace, rounded-2xl/3xl cards, subtle borders (border-neutral-100), soft shadows on hover (hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.12)]), framer-motion entrance animations (opacity/y, ease [0.22,1,0.36,1]). Headings use font-heading. Buttons: primary = bg-neutral-900 text-white rounded-full hover:bg-neutral-800; outline = border-neutral-200 bg-white. Indigo (text-indigo-500, bg-indigo-50) only for AI accents, progress, and next-steps.
+2. Routing (src/App.jsx)
+Surgically edit (do NOT rewrite the scaffold — preserve AuthProvider, QueryClientProvider, Router, Toaster, ScrollToTop, AuthenticatedApp). Add imports for Layout (@/components/Layout), Landing, Program, Interview, Candidate (all @/pages/*). Inside AuthenticatedApp's <Routes>, add a layout route wrapping the four pages, keeping the existing catch-all:
+
+<Route element={<Layout />}>
+  <Route path="/" element={<Landing />} />
+  <Route path="/program" element={<Program />} />
+  <Route path="/interview" element={<Interview />} />
+  <Route path="/candidate" element={<Candidate />} />
+</Route>
+<Route path="*" element={<PageNotFound />} />
+3. Layout (src/components/Layout.jsx)
+Sticky h-16 header (bg-white/80 backdrop-blur-xl, border-b border-neutral-100) with: Logo (left, h-7), centered desktop nav (Home, Program, Interview, Candidates — active = text-neutral-900 with a -bottom-px h-px bg-neutral-900 underline; inactive text-neutral-500 hover:text-neutral-900), and a right-side "Start Interview" button (<Sparkles/> + label, rounded-full bg-neutral-900 text-white, links to /interview). Mobile: hamburger (Menu/X from lucide) toggling a stacked menu. Footer: border-t border-neutral-100 bg-neutral-50, Logo + copyright. Uses <Outlet/> for page content. useLocation() to compute active link.
+
+4. Splash (src/components/Splash.jsx)
+Full-screen fixed inset-0 z-[100] bg-white overlay shown only on first visit per browser session (guard with sessionStorage key abt_splash_seen): if seen, render nothing. Otherwise show the Logo centered at w-[min(58vw,360px)] (framer-motion fade/scale-in), plus below it a tiny uppercase tracking-[0.35em] text-neutral-400 label "AI-Powered Technical Interviews" flanked by two h-px w-8 bg-neutral-300 rules. Auto-hide after 2300ms, set the sessionStorage flag, exit with a 0.7s opacity fade. Render <Splash/> at the top of the Landing page.
+
+5. Entity — base44/entities/InterviewSession.jsonc
+Create the full schema object:
+
+session_id (string, unique human-readable e.g. ABT-XXXXXX)
+candidate_name (string), email (string), role (string), experience (enum: Entry/Junior/Mid/Senior/Lead), focus_area (string)
+status (enum: in_progress/completed, default in_progress)
+messages (array of { role: "ai"|"candidate", content: string })
+question_count (number, default 0)
+feedback (object: summary string, strengths/gaps/next_steps arrays of string, overall_score number, recommendation string)
+required: ["session_id","candidate_name","email"]
+Never declare built-ins (id, created_date, updated_date, created_by_id). No RLS (public app).
+6. Curriculum data (src/lib/curriculum.js)
+Export default an object: { cohort: "AI Cohort · 31 days · 8 modules", modules: [...8 modules with n/title/days], days: [...31 day objects] }. Use the full 31-day curriculum (Environment & Tooling → Production & Capstone) — each day: { day, title, type, tools[], objectives[] }. Types include SETUP, BUILD, AI_CORE, LEARN, SHIP_IT, OPTIMIZE, CAPSTONE. (This is the source of truth for the Program page and for the AI evaluator's module references.)
+
+7. Landing page (src/pages/Landing.jsx)
+Render <Splash/> first.
+Hero: subtle grid + radial-indigo-glow background (mask-image radial fade). Cohort badge (Sparkles + curriculum.cohort). H1: "Technical interviews," / gradient-indigo "conducted by AI." Subcopy. Two CTAs: "Start your interview" (→/interview) and "Explore the program" (→/program). Trust row: ✓ Adaptive questions · ✓ Unique session ID · ✓ Structured feedback · ✓ Program-aligned next steps.
+Features grid (6 cards, lucide icons: BrainCircuit, MessagesSquare, ClipboardCheck, Route, Gauge, ShieldCheck): Adaptive Questioning, Conversal Interview, Structured Feedback, Program-Aligned, Quantified Score, Consistent & Fair. Each: black h-11 w-11 icon tile, title, body; hover lift.
+How it works (bg-neutral-50 section): three numbered steps (Enter details → Interview with AI → Get structured feedback). Plus a black CTA bar "Ready to be interviewed?" → /interview.
+All sections max-w-6xl px-5, framer-motion fade-in.
+8. Program page (src/pages/Program.jsx)
+Header with cohort badge + "The 31-day program" title.
+Module selector: 8 buttons (sm:grid-cols-2 lg:grid-cols-4). Active = border-neutral-900 bg-neutral-900 text-white shadow-lg; inactive = white card, hover lift. Each shows 01..08 mono badge, title, "Days X–Y · N days".
+Active module detail: card with Module number, title, day range, a "Test this module" button → /interview. Then each day as a sub-card: a "Day N" tile + title + a colored type Badge, a Tools list (chips) and Objectives list (ChevronRight bullets). Type→color map:
+SETUP→sky, BUILD→emerald, AI_CORE→indigo, LEARN→amber, SHIP_IT→rose, OPTIMIZE→violet, CAPSTONE→neutral-900/white.
+Uses useState(activeModule); detail re-animates on switch.
+9. Interview — the core flow
+Three focused components under src/components/interview/, orchestrated by src/pages/Interview.jsx.
+
+9a. AI helper (src/lib/interviewAi.js)
+export const TOTAL_QUESTIONS = 8;
+Build a module summary string from curriculum.modules ("${n}. ${title} (days ${start}-${end})" joined by newlines) — this is fed to the evaluator.
+generateSessionId(): ABT- + 6 random chars from "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".
+getNextMessage(candidate, messages, questionsAnswered): calls base44.integrations.Core.InvokeLLM with response_json_schema { type:object, properties:{ message:string, is_closing:boolean }, required:[message,is_closing] }. Prompt: you are "AB Talks", an AI technical interviewer for the 31-day AI Engineering program; include candidate profile (name/role/experience/focus_area), the conversation transcript so far (Interviewer:/Candidate: lines), and questionsAnswered of 8. If first message → warmly welcome by name, explain the adaptive ~8-question format, then ask the FIRST technical question. Otherwise → one short acknowledgement of the last answer, then the NEXT adaptive question (adapt difficulty: deeper if strong, simplify/shift if weak; cover a balanced spread across Python, data, embeddings/vector search, LLMs/prompting, RAG, fine-tuning, agents/MCP, evaluation/deployment; ONE question per message). If questionsAnswered >= 8 → no more questions, give a friendly closing thanking them and saying you'll prepare feedback, set is_closing true. Return { message, is_closing }.
+evaluateInterview(candidate, messages): calls InvokeLLM with schema { summary:string, strengths:string[], gaps:string[], next_steps:string[], overall_score:number, recommendation:string } (all required). Prompt: you are "AB Talks" evaluating a completed interview; include profile, full transcript, and the module summary above. next_steps MUST each reference a specific module number and/or day range based on the candidate's gaps (e.g. "Revisit Module 3: Embeddings & Vector Search (days 7-10) to strengthen cosine similarity intuition"). overall_score integer 0–100. recommendation ∈ {"Strong Candidate","Conditional — Needs Review","Needs More Preparation"}. Normalize array types defensively; default recommendation "Needs More Preparation".
+transcriptText helper formats messages as Interviewer:/Candidate:.
+9b. InterviewForm.jsx (src/components/interview/InterviewForm.jsx)
+Centered max-w-xl card: "Step 1 of 2 · Candidate details" badge, "Before we begin" title, subcopy. Fields: Full name, Email (type=email), Target role (default "AI Engineer"), Experience level (5 pill buttons Entry/Junior/Mid/Senior/Lead, active = bg-neutral-900 text-white), Focus area (native <select> populated from curriculum.modules as "Module N: Title"). Validate name non-empty + email regex; show "Required"/inline error only after submit attempt. Submit button "Start interview" calls onStart(form).
+
+9c. InterviewChat.jsx (src/components/interview/InterviewChat.jsx)
+Props: { candidate, sessionId, sessionIdRecord:{id}, onComplete }. Full-height flex h-[calc(100vh-4rem)] column.
+
+Header row: black Sparkles avatar + "AB Talks Interviewer" + mono sessionId (with Hash icon); right side: "Question {min(qa,8)}/8" + a 112px indigo progress bar (bg-indigo-500, width = qa/8).
+On mount (once): call getNextMessage(candidate, [], 0) → append AI message → base44.entities.InterviewSession.update(record.id, { messages }) (catch errors silently; fallback welcome message on throw). Show a typing indicator while loading.
+Messages: AI bubbles left (bg-neutral-100, black Sparkles avatar), candidate bubbles right (rounded-br-sm bg-neutral-900 text-white). whitespace-pre-wrap. Each animates in.
+Typing indicator: three bouncing dots in a neutral-100 bubble (staggered animationDelay).
+Send: textarea (Enter sends, Shift+Enter newline) + send button (Send icon). On send: append candidate answer, increment questionsAnswered, clear input, call runAiTurn(next, nextAnswered) → getNextMessage → append AI message → persist update with { messages, question_count }. If is_closing → call finalize(messages) (no more questions).
+finalize: set evaluating, call evaluateInterview → update(record.id, { status:"completed", feedback, question_count }) → onComplete(feedback). Fallback feedback object on error.
+When questionsAnswered >= 8: show a small emerald "Minimum questions reached — wrapping up." note. Disable input while loading/evaluating; placeholder "Preparing your feedback…" while evaluating.
+9d. FeedbackCard.jsx (src/components/interview/FeedbackCard.jsx)
+Modal overlay fixed inset-0 z-50 bg-black/40 backdrop-blur-sm with a centered max-w-2xl rounded-3xl bg-white shadow-2xl card (framer-motion scale-in).
+
+Black header: "Interview complete" badge (Sparkles), "{name}, here's your evaluation" title, mono session id, and a circular SVG score ring (0–100, strokeDasharray of pct/100 * 276.46 on a white-15% track) with the number in the center, plus the recommendation (Star icon). Close X button top-right.
+Body (scrollable): Summary section (indigo Sparkles). Two-column: Strengths (emerald CheckCircle2 bullets) and Gaps (rose AlertTriangle bullets). Then an indigo-tinted "Next steps — your program path" box listing numbered next_steps (indigo circular badges).
+Footer: "View program" outline button (→/program, Route icon) and "New interview" black button (RotateCcw) — both call onRestart / onClose.
+Empty arrays render graceful "Not enough signal…" / "No major gaps detected." placeholders.
+9e. Interview.jsx (src/pages/Interview.jsx)
+State: stage ("form"|"chat"), candidate, sessionId, recordId, feedback.
+
+start(data): generate session id, set candidate/sessionId, base44.entities.InterviewSession.create({ session_id, candidate_name, email, role, experience, focus_area, status:"in_progress", messages:[], question_count:0 }) → store recordId (proceed in-memory if create fails) → setStage("chat").
+complete(fb): setFeedback(fb) (chat stays mounted; card overlays on top).
+restart(): clear everything back to form.
+Render: form stage → <InterviewForm onStart={start}/>; chat stage → <div className="relative"><InterviewChat .../>{feedback && <FeedbackCard .../>}</div>. Crucial: do NOT remount InterviewChat for feedback — the card overlays the still-mounted chat (remounting would re-fire the welcome effect and create a duplicate session).
+10. Candidate page (src/pages/Candidate.jsx)
+Header: "Interview sessions" + subcopy about unique session IDs.
+On mount: base44.entities.InterviewSession.list("-created_date", 50).
+Stat row: Total sessions / Completed / Avg score (of completed).
+Loading spinner; empty state (Inbox icon + "Start interview" CTA); else a 2-column layout: left = list of session buttons (mono session id with Hash, name, role · experience, and either a colored score chip — emerald ≥75, amber ≥50, rose <50 — or an amber "In progress" badge); right = sticky detail panel showing the selected session's full feedback (score block, summary, strengths/gaps, next steps) or "Select a session to view its feedback."
+Reuse the same score→color logic as FeedbackCard.
+11. Build-reliability rules (mandatory)
+ESM only — never require()/module.exports. JSX only in .jsx. Hooks at top level only.
+cn from @/lib/utils; createPageUrl from @/utils. Import shadcn primitives from their own file (Button from @/components/ui/button, Badge from @/components/ui/badge). Use @/ alias everywhere, never relative src/ paths.
+Only import lucide icons that exist; alias any icon colliding with a component name.
+Tailwind classes as literal strings (no dynamic bg-${x} — they get purged).
+Let errors bubble (no try/catch) except: form validation, and the interview flow's LLM/persistence calls (those catch and fall back gracefully so the interview never dead-ends).
+Each page/component its own file, ≤~50 lines where reasonable. Export every page/component as default, named like its file.
+12. Done-criteria
+Every flow finishes: splash fades → landing renders → program browses all 31 days → interview creates a unique session ID, welcomes the candidate, asks ≥8 adaptive questions, persists the transcript, then pops the structured feedback card (summary/strengths/gaps/program-aligned next steps + score) over the chat → candidate dashboard lists past sessions with feedback. No stubs, no dead-ends.
+
+# Sprints 8.1 - Small changes 
+
+In header the implement the glassmorphism effect and the sction i select it turn into black box.
+
+In program option give option of select whole module day wise (means if i tap module 2 so there will day wise detail be display and just below the day give the button of completion and at side give button of start learning).
+
+Increase the size of Logo.png in header.
+
+Make a flash screen of logo in white color where logo is zoom in then enter to landing page.
+
+# Sprints 8.2 - Header and logo changes 
+
+In flash screen increase the size of  logo.
+
+[curriculum.json] Analyse this and make the content in the module option through of 31 days program content with 8 modules.
+
+# Sprints 8.3 - Changes in Top bar (header)
+
+Make the sidely curve and make it professionnal header and give the space between the from above and side also.
+
