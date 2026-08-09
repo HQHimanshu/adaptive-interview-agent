@@ -45,6 +45,10 @@ const EvaluationModal = ({ session, onClose }) => {
           
           <div className="score-section">
             <div className="score-circle">
+              <svg width="72" height="72" viewBox="0 0 72 72">
+                <circle cx="36" cy="36" r="32" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
+                <circle cx="36" cy="36" r="32" fill="none" stroke="white" strokeWidth="4" strokeDasharray="201" strokeDashoffset={201 - (201 * score) / 100} strokeLinecap="round" />
+              </svg>
               <span className="score-value">{score}</span>
             </div>
             <div className="recommendation-area">

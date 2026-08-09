@@ -185,6 +185,13 @@
   padding: 32px;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-color: var(--border-hover);
 }
 
 .feature-icon-wrapper {
@@ -225,6 +232,13 @@
   padding: 32px;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-color: var(--border-hover);
 }
 
 .step-num {

@@ -7,6 +7,9 @@
 .program-badge {
   margin-bottom: 24px;
   justify-content: flex-start;
+  color: var(--text);
+  background: white;
+  border-color: var(--border);
 }
 
 .program-title {

@@ -4,6 +4,14 @@
   margin: 0 auto;
 }
 
+.program-badge {
+  margin-bottom: 24px;
+  justify-content: flex-start;
+  color: var(--text);
+  background: white;
+  border-color: var(--border);
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
