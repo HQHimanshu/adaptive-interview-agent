@@ -1,0 +1,35 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.page-transition-slide-right {
+  animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.page-transition-slide-left {
+  animation: slideInLeft 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
