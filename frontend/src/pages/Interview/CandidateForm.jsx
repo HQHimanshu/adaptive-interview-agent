@@ -38,7 +38,7 @@ const CandidateForm = () => {
     email: '',
     role: 'AI Engineer',
     experience: 'Mid',
-    focusArea: curriculumData.modules[0].title
+    focusAreas: [curriculumData.modules[0].title]
   });
   
   const [error, setError] = useState('');
@@ -50,6 +50,18 @@ const CandidateForm = () => {
 
   const handleLevelSelect = (level) => {
     setFormData(prev => ({ ...prev, experience: level }));
+  };
+
+  const handleFocusAreaToggle = (title) => {
+    setFormData(prev => {
+      const current = prev.focusAreas;
+      if (current.includes(title)) {
+        if (current.length === 1) return prev; // Ensure at least one is selected
+        return { ...prev, focusAreas: current.filter(t => t !== title) };
+      } else {
+        return { ...prev, focusAreas: [...current, title] };
+      }
+    });
   };
 
   const handleSubmit = (e) => {
@@ -104,12 +116,22 @@ const CandidateForm = () => {
           </div>
           
           <div className="form-group">
-            <label className="form-label"><TargetIcon /> FOCUS AREA</label>
-            <select name="focusArea" value={formData.focusArea} onChange={handleChange} className="form-input select-input">
-              {curriculumData.modules.map(mod => (
-                <option key={mod.n} value={mod.title}>Module {mod.n}: {mod.title}</option>
-              ))}
-            </select>
+            <label className="form-label"><TargetIcon /> FOCUS AREAS</label>
+            <div className="focus-area-selector">
+              {curriculumData.modules.map(mod => {
+                const isActive = formData.focusAreas.includes(mod.title);
+                return (
+                  <button 
+                    type="button" 
+                    key={mod.n} 
+                    onClick={() => handleFocusAreaToggle(mod.title)} 
+                    className={`focus-btn ${isActive ? 'active' : ''}`}
+                  >
+                    Module {mod.n}: {mod.title}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {error && <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: '14px', background: '#fee2e2', padding: '12px', borderRadius: '8px' }}>{error}</div>}
