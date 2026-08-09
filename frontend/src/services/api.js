@@ -7,7 +7,7 @@ export const api = {
    */
   startInterview: async (sessionId, candidate) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/interview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
