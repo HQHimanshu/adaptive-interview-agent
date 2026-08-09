@@ -1,0 +1,61 @@
+export const api = {
+  /**
+   * Starts a new interview session.
+   * @param {string} sessionId - The unique ID for the session.
+   * @param {object} candidate - The candidate object.
+   * @returns {Promise<{reply: string, done: boolean}>}
+   */
+  startInterview: async (sessionId, candidate) => {
+    try {
+      const response = await fetch('/api/interview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          candidate
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error starting interview:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Sends a message in an ongoing interview session.
+   * @param {string} sessionId - The unique ID for the session.
+   * @param {string} message - The candidate's message/answer.
+   * @returns {Promise<{reply: string, done: boolean, feedback?: object}>}
+   */
+  sendInterviewMessage: async (sessionId, message) => {
+    try {
+      const response = await fetch('/api/interview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          message
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error sending interview message:", error);
+      throw error;
+    }
+  }
+};

@@ -1,0 +1,152 @@
+.chat-layout {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 72px);
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.interviewer-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.bg-dark {
+  background: var(--text);
+}
+
+.interviewer-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.session-tag {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-family: monospace;
+}
+
+.question-progress {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-faint);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.progress-bar-container {
+  width: 100px;
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 40px 0;
+  overflow-y: auto;
+}
+
+.message-wrapper {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  max-width: 80%;
+}
+
+.ai-message {
+  align-self: flex-start;
+}
+
+.message-bubble {
+  background: #f4f4f5;
+  padding: 20px 24px;
+  border-radius: 8px 16px 16px 16px;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.chat-input-area {
+  padding: 24px 0 40px;
+}
+
+.input-box-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 8px 8px 16px;
+  background: white;
+}
+
+.chat-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  padding: 8px 0;
+}
+
+.send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--text-faint);
+  color: white;
+}
+
+.send-btn:hover {
+  background: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .chat-layout {
+    padding: 0 16px;
+  }
+  
+  .message-wrapper {
+    max-width: 95%;
+  }
+  
+  .chat-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .question-progress {
+    align-items: flex-start;
+  }
+}

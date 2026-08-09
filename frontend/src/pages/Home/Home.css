@@ -1,0 +1,276 @@
+.home-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero Section */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 20px;
+  min-height: calc(100vh - 72px);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+
+.badge-icon {
+  color: var(--primary);
+}
+
+.hero-title {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  margin-bottom: 24px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #5c3ce6 0%, #8752f3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 64px;
+}
+
+.btn-lg {
+  height: 48px;
+  padding: 0 24px;
+  font-size: 15px;
+}
+
+.features-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  color: var(--text-faint);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.features-list span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Common Section Styles */
+.why-section, .how-section, .cta-section {
+  padding: 64px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section-header {
+  margin-bottom: 48px;
+}
+
+.section-eyebrow {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+/* Feature Grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-icon-wrapper {
+  background: #18181b;
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.feature-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.feature-desc {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Steps Grid */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.step-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-num {
+  color: var(--primary);
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.step-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.step-desc {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* CTA Banner */
+.cta-banner {
+  background: #18181b;
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 48px 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cta-title {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.cta-subtitle {
+  color: #a1a1aa;
+  font-size: 16px;
+}
+
+.cta-btn {
+  color: #18181b;
+  border: none;
+}
+.cta-btn:hover {
+  background: #e4e4e7;
+  color: #18181b;
+  border-color: #e4e4e7;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 992px) {
+  .feature-grid, .steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 40px;
+  }
+  
+  .hide-mobile {
+    display: none;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 16px;
+  }
+  
+  .hero-actions .btn {
+    width: 100%;
+  }
+  
+  .features-list {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .section-title {
+    font-size: 32px;
+  }
+  
+  .why-section, .how-section, .cta-section {
+    padding: 40px 20px;
+  }
+  
+  .feature-grid, .steps-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .cta-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 32px 24px;
+  }
+  
+  .cta-title {
+    font-size: 24px;
+  }
+  
+  .cta-btn {
+    width: 100%;
+  }
+}

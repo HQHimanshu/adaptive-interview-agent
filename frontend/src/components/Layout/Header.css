@@ -1,0 +1,11 @@
+.header-logo .logo-icon {
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+.header-logo sub {
+  font-size: 10px;
+  margin-left: 2px;
+  font-weight: 600;
+}
